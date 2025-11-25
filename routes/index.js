@@ -13,7 +13,7 @@ const constructorMethod = (app) => {
   app.use("/account/pets", pets);
   app.use("/user", user);
 
-  app.use("*", (req, res) => {
+  app.use("*", (_req, res) => {
     res.status(404).send("Page Not Found!");
   });
 };
