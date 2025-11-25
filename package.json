@@ -25,6 +25,7 @@
   "author": "Gundeep Singh Saluja",
   "license": "ISC",
   "dependencies": {
+    "@upstash/redis": "^1.35.6",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "cors": "^2.8.5",
@@ -38,7 +39,6 @@
     "node-cron": "^3.0.2",
     "nodemailer": "^6.9.1",
     "path": "^0.12.7",
-    "redis": "^4.6.6",
     "xss": "^1.0.14"
   },
   "devDependencies": {

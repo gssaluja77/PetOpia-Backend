@@ -11,7 +11,7 @@ const dbConnection = async () => {
       _connection = await MongoClient.connect(process.env.DATABASE_URL_LOCAL);
       _db = await _connection.db(process.env.DATABASE_NAME);
     } else {
-      _connection = await MongoClient.connect(process.env.DATABASE_URL);
+      _connection = await MongoClient.connect(process.env.MONGODB_URI);
       _db = await _connection.db(process.env.DATABASE_NAME);
     }
   }

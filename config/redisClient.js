@@ -1,35 +1,54 @@
-import Redis from "ioredis";
+import IORedis from "ioredis";
+import { Redis as UpstashRedis } from "@upstash/redis";
 
 let client = null;
 let isConnected = false;
+let isUpstash = false;
 
-const redisUrl = process.env.REDIS_URL;
 const redisUrlLocal = process.env.REDIS_URL_LOCAL;
 
 if (process.env.NODE_ENV === "development") {
-  client = new Redis(redisUrlLocal);
-} else {
-  client = new Redis(redisUrl, {
-    tls: redisUrl?.startsWith("rediss://") ? {} : undefined,
+  client = new IORedis(redisUrlLocal);
+
+  client.on("error", (err) => {
+    console.error("Redis Error:", err.message);
+    isConnected = false;
   });
+
+  client.on("ready", () => {
+    console.log("Local Redis connected");
+    isConnected = true;
+  });
+} else {
+  const url = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+
+  if (url && token) {
+    try {
+      client = new UpstashRedis({
+        url: url,
+        token: token,
+      });
+      isUpstash = true;
+      isConnected = true;
+      console.log("Upstash Redis (Vercel KV) configured");
+    } catch (error) {
+      console.error("Upstash Config Error:", error);
+      isConnected = false;
+    }
+  } else {
+    console.warn("Upstash credentials missing. Caching disabled.");
+    isConnected = false;
+  }
 }
-
-client.on("error", (err) => {
-  console.error("Redis Error:", err.message);
-  isConnected = false;
-});
-
-client.on("ready", () => {
-  console.log("✓ Redis connected");
-  isConnected = true;
-});
 
 const safeClient = {
   async get(key) {
     if (!isConnected) return null;
     try {
       return await client.get(key);
-    } catch {
+    } catch (error) {
+      console.error("Redis Get Error:", error);
       return null;
     }
   },
@@ -38,21 +57,30 @@ const safeClient = {
     if (!isConnected) return;
     try {
       await client.set(key, value);
-    } catch { }
+    } catch (error) {
+      console.error("Redis Set Error:", error);
+    }
   },
 
   async hSet(key, field, value) {
     if (!isConnected) return;
     try {
-      await client.hset(key, field, value);
-    } catch { }
+      if (isUpstash) {
+        await client.hset(key, { [field]: value });
+      } else {
+        await client.hset(key, field, value);
+      }
+    } catch (error) {
+      console.error("Redis HSet Error:", error);
+    }
   },
 
   async hGet(key, field) {
     if (!isConnected) return null;
     try {
       return await client.hget(key, field);
-    } catch {
+    } catch (error) {
+      console.error("Redis HGet Error:", error);
       return null;
     }
   },
@@ -61,14 +89,17 @@ const safeClient = {
     if (!isConnected) return;
     try {
       await client.hdel(key, field);
-    } catch { }
+    } catch (error) {
+      console.error("Redis HDel Error:", error);
+    }
   },
 
   async hExists(key, field) {
     if (!isConnected) return 0;
     try {
       return await client.hexists(key, field);
-    } catch {
+    } catch (error) {
+      console.error("Redis HExists Error:", error);
       return 0;
     }
   },
@@ -77,7 +108,8 @@ const safeClient = {
     if (!isConnected) return 0;
     try {
       return await client.exists(key);
-    } catch {
+    } catch (error) {
+      console.error("Redis Exists Error:", error);
       return 0;
     }
   },
@@ -85,15 +117,23 @@ const safeClient = {
   async setex(key, seconds, value) {
     if (!isConnected) return;
     try {
-      await client.setex(key, seconds, value);
-    } catch { }
+      if (isUpstash) {
+        await client.set(key, value, { ex: seconds });
+      } else {
+        await client.setex(key, seconds, value);
+      }
+    } catch (error) {
+      console.error("Redis SetEx Error:", error);
+    }
   },
 
   async del(key) {
     if (!isConnected) return;
     try {
       await client.del(key);
-    } catch { }
+    } catch (error) {
+      console.error("Redis Del Error:", error);
+    }
   },
 };
 
