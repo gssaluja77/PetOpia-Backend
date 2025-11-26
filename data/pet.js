@@ -5,6 +5,7 @@ import client from "../config/redisClient.js";
 import { internalServerError, notFoundError } from "../helpers/wrappers.js";
 
 const getAllPets = async (userId) => {
+  console.log(`[getAllPets] Fetching for userId: ${userId}`);
   const collection = await users();
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   if (!user) {
