@@ -111,7 +111,7 @@ const newPost = async (
     postImage: postImage,
     postTitle: postTitle,
     postDescription: postDescription,
-    postDate: moment().format("MMMM Do YYYY"),
+    postDate: moment().format("MMM Do YYYY"),
     postTime: moment().format("h:mm A"),
     postComments: [],
     postLikes: [],
