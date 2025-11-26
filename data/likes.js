@@ -16,7 +16,7 @@ const likePost = async (userId, postId) => {
     { _id: new ObjectId(postId) },
     { projection: { _id: 1 } }
   );
-  if (!postExists) notFoundError("Post doesn't exist!");
+  if (!postExists) throw notFoundError("Post doesn't exist!");
 
   const updatedInfo = await postsCollection.updateOne(
     { _id: new ObjectId(postId) },

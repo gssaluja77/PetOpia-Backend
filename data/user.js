@@ -3,6 +3,8 @@ import { badRequestError, internalServerError } from "../helpers/wrappers.js";
 import bcrypt from "bcrypt";
 import * as dotenv from "dotenv";
 
+import client from "../config/redisClient.js";
+
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
@@ -26,6 +28,7 @@ const registerUser = async (email, password) => {
     throw internalServerError("Error : Could not add user!");
   }
   let id = insertInfo.insertedId.toString();
+  await client.set(email, id);
   return { id, email };
 };
 
@@ -41,6 +44,7 @@ const checkUser = async (email, password) => {
     throw badRequestError("Invalid email or password");
   }
 
+  await client.set(email, user._id.toString());
   return { id: user._id.toString(), email: user.email };
 };
 
