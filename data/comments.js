@@ -148,9 +148,7 @@ const likeComment = async (userId, postId, commentId) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Like not updated!");
   const commentLiked = await getCommentByCommentId(postId, commentId);
-  // commentLiked._id = commentLiked._id.toString();
-  const updatedPost = await getPostById(postId);
-  // getPostById updates the cache, so we don't need explicit hDel/hSet here.
+  await getPostById(postId);
   return { liked: true, likesLength: commentLiked.commentLikes.length };
 };
 
@@ -174,7 +172,7 @@ const unlikeComment = async (userId, postId, commentId) => {
   const commentLiked = await getCommentByCommentId(postId, commentId);
   commentLiked._id = commentLiked._id.toString();
   const updatedPost = await getPostById(postId);
-  // getPostById updates the cache, so we don't need explicit hDel/hSet here.
+
   return { liked: true, likesLength: commentLiked.commentLikes.length };
 };
 

@@ -10,7 +10,7 @@ router
       const likedData = await likePost(userThatPosted, req.params.postId);
       res.json({ likedData: likedData });
     } catch (error) {
-      console.log(error);
+
       let status = 500;
       if (error.code && error.code >= 100 && error.code < 600) {
         status = error.code;
@@ -26,7 +26,7 @@ router
       const unlikedData = await unlikePost(req.params.userId, req.params.postId);
       res.json({ unlikedData: unlikedData });
     } catch (error) {
-      console.log(error);
+
       let status = 500;
       if (error.code && error.code >= 100 && error.code < 600) {
         status = error.code;

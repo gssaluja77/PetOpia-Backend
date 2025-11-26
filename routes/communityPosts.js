@@ -17,7 +17,7 @@ router.route("/").get(async (req, res) => {
     const searchedData = await searchPosts(req.query.keyword);
     res.json({ allData: allData, searchedData: searchedData });
   } catch (error) {
-    console.log(error);
+
     let status = 500;
     if (error.code && error.code >= 100 && error.code < 600) {
       status = error.code;

@@ -17,9 +17,10 @@ const getAllPosts = async (page = 1) => {
   const limit = 4;
   if (!Number.isInteger(page)) page = Number(page);
 
-  // Check Redis Cache
-  const cacheKey = `all_posts_page_${page}`;
-  const cachedData = await client.get(cacheKey);
+  // Check Redis Cache (Hash)
+  const cacheKey = "community_posts_pages";
+  const field = `page_${page}`;
+  const cachedData = await client.hGet(cacheKey, field);
   if (cachedData) {
     return JSON.parse(cachedData);
   }
@@ -61,8 +62,7 @@ const getAllPosts = async (page = 1) => {
     };
   }
 
-  // Cache the result for 5 minutes
-  await client.setex(cacheKey, 300, JSON.stringify(result));
+  await client.hSet(cacheKey, field, JSON.stringify(result));
   return result;
 };
 
@@ -120,7 +120,11 @@ const newPost = async (
 
   if (!insertedInfo.acknowledged)
     throw internalServerError("Could not add community post to the database!");
+
   await client.hSet("posts", addPost._id.toString(), JSON.stringify(addPost));
+
+  await client.del("community_posts_pages");
+
   return addPost;
 };
 
@@ -180,9 +184,10 @@ const editPost = async (
   );
   if (updateInfo.modifiedCount === 0)
     throw internalServerError("You haven't made any changes!");
-  // const editedPost = await getPostById(postId);
-  // await client.hDel("posts", postId.toString());
-  // await client.hSet("posts", postId.toString(), JSON.stringify(editedPost));
+
+  // Invalidate feed cache
+  await client.del("community_posts_pages");
+
   return await getPostById(postId);
 };
 
@@ -201,6 +206,9 @@ const deletePost = async (postId) => {
     throw internalServerError("Post couldn't be delete!");
   }
   await client.hDel("posts", postId.toString());
+
+  await client.del("community_posts_pages");
+
   return { postId: postId, deleted: true };
 };
 

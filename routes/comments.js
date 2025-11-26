@@ -38,7 +38,7 @@ router.route("/:postId/:commentId")
       );
       res.json(postAfterDeletion);
     } catch (error) {
-      console.log(error);
+
       let status = 500;
       if (error.code && error.code >= 100 && error.code < 600) {
         status = error.code;
@@ -69,7 +69,7 @@ router.route("/:postId/:commentId")
       );
       res.json(commentLiked);
     } catch (error) {
-      console.log(error);
+
       let status = 500;
       if (error.code && error.code >= 100 && error.code < 600) {
         status = error.code;
