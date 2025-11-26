@@ -22,7 +22,6 @@ router
   .route("/:postId/:userId")
   .delete(async (req, res) => {
     try {
-      // const { userThatPosted } = req.body;
       const unlikedData = await unlikePost(req.params.userId, req.params.postId);
       res.json({ unlikedData: unlikedData });
     } catch (error) {

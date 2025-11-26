@@ -101,20 +101,6 @@ const deletePet = async (userId, petId) => {
   return await getAllPets(userId);
 };
 
-// const getAllMed = async (userId, petId) => {
-//     const collection = await users();
-//     const user = await collection.findOne(
-//         {_id: new ObjectId(userId)}
-//     )
-
-//     let res = user.pets;
-//     for(let i = 0; i < res.length; i++) {
-//         if(res[i]['_id'].toString() === petId) {
-//             return res[i].medications;
-//         }
-//     }
-//     return "It seems like your pet is perfectly alright. No medications found";
-// }
 
 const createMed = async (
   userId,
@@ -165,20 +151,6 @@ const deleteMed = async (userId, petId, medId) => {
   return updatedPet;
 };
 
-// const getAllApp = async (userId, petId) => {
-//     const collection = await users();
-//     const user = await collection.findOne(
-//         {_id: new ObjectId(userId)}
-//     )
-
-//     let res = user.pets;
-//     for(let i = 0; i < res.length; i++) {
-//         if(res[i]['_id'].toString() === petId) {
-//             return res[i].appointments;
-//         }
-//     }
-//     return "An apple a day keeps the docter away. Sorry, dog food a day keeps the docter away. No upcoming appointments";
-// }
 
 const createApp = async (
   userId,
@@ -229,20 +201,6 @@ const deleteApp = async (userId, petId, appId) => {
   return updatedPet;
 };
 
-// const getAllPres = async (userId, petId) => {
-//     const collection = await users();
-//     const user = await collection.findOne(
-//         {_id: new ObjectId(userId)}
-//     )
-
-//     let res = user.pets;
-//     for(let i = 0; i < res.length; i++) {
-//         if(res[i]['_id'].toString() === petId) {
-//             return res[i].prescription;
-//         }
-//     }
-//     return "Relax your pet is doing just fine. No prescription found"
-// }
 
 const createPres = async (userId, petId, imageUrl) => {
   const collection = await users();

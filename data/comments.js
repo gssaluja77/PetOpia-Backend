@@ -5,21 +5,6 @@ import { validateObjectId, validateString } from "../helpers/validations.js";
 import { internalServerError, notFoundError } from "../helpers/wrappers.js";
 import client from "../config/redisClient.js";
 
-// const getCommentsByPostId = async (postId) => {
-//   validateObjectId(postId, "Post ID");
-//   postId = postId.trim();
-
-//   const postById = await getPostById(postId);
-//   if (postById === null) throw notFoundError("Post doesn't exist!");
-//   postById.postComments.forEach((ele) => {
-//     ele._id = ele._id.toString();
-//   });
-//   // postById.postComments.sort().reverse();
-//   postById.postComments.sort((a,b) => {
-//     return b.commentLikes.length - a.commentLikes.length;
-//   })
-//   return postById;
-// };
 
 const getCommentByCommentId = async (postId, commentId) => {
   validateObjectId(commentId, "Comment ID");
@@ -61,12 +46,10 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
     commentTime: date.toLocaleTimeString('en-US', { timeStyle: "short" }),
     comment: comment,
     commentLikes: [],
-    // replies: [],
   };
 
   const postsCollection = await communityPosts();
 
-  // Quick existence check without fetching full post data
   const postExists = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
     { projection: { _id: 1 } }
@@ -80,7 +63,6 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Comment could not be posted!");
 
-  // Write-through caching: Update Redis directly
   let cachedPost = await client.hGet("posts", postId.toString());
   if (cachedPost) {
     if (typeof cachedPost === 'string') cachedPost = JSON.parse(cachedPost);
@@ -88,7 +70,6 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
     await client.hSet("posts", postId.toString(), JSON.stringify(cachedPost));
   }
 
-  // Return the new comment directly instead of fetching the whole post
   newComment._id = newComment._id.toString();
   return newComment;
 };
@@ -107,7 +88,7 @@ const deleteComment = async (postId, commentId) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Comment could not be deleted!");
   const updatedPost = await getPostById(postId);
-  // getPostById updates the cache, so we don't need explicit hDel/hSet here.
+
   return updatedPost;
 };
 
@@ -176,24 +157,11 @@ const unlikeComment = async (userId, postId, commentId) => {
   return { liked: true, likesLength: commentLiked.commentLikes.length };
 };
 
-// const replyToComment = () => {};
-
-// const likeReply = () => {};
-
-// const editReply = () => {};
-
-// const deleteReply = () => {};
-
 export {
-  // getCommentsByPostId,
   getCommentByCommentId,
   postComment,
   deleteComment,
   editComment,
   likeComment,
   unlikeComment,
-  // replyToComment,
-  // likeReply,
-  // editReply,
-  // deleteReply,
 };

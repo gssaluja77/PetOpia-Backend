@@ -17,7 +17,6 @@ const getAllPosts = async (page = 1) => {
   const limit = 4;
   if (!Number.isInteger(page)) page = Number(page);
 
-  // Check Redis Cache (Hash)
   const cacheKey = "community_posts_pages";
   const field = `page_${page}`;
   const cachedData = await client.hGet(cacheKey, field);
@@ -187,7 +186,6 @@ const editPost = async (
   if (updateInfo.modifiedCount === 0)
     throw internalServerError("You haven't made any changes!");
 
-  // Invalidate feed cache
   await client.del("community_posts_pages");
 
   return await getPostById(postId);

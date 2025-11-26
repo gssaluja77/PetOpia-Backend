@@ -35,12 +35,8 @@ router.route("/login").post(async (req, res) => {
     validateEmail(email);
     validatePassword(password);
 
-    // Check Redis first? No, we must verify password.
-    // We can check Redis to see if user exists to fail fast, but that leaks info.
-    // Just go to DB via checkUser.
-
     let data = await checkUser(email, password);
-    // Update Redis cache
+
     await client.set(email, data.id);
 
     res.status(200).send(data);

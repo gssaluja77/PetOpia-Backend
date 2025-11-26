@@ -3,7 +3,6 @@ import xss from "xss";
 import {
   deleteComment,
   editComment,
-  // getCommentsByPostId,
   likeComment,
   postComment,
   unlikeComment,
@@ -94,16 +93,5 @@ router.route("/:postId/:commentId/:userThatPosted").delete(async (req, res) => {
     res.status(status).send(error.message);
   }
 });
-// .get(async (req, res) => {
-//   try {
-//     const commentById = await getCommentByCommentId(
-//       req.params.postId,
-//       req.params.commentId
-//     );
-//     res.json(commentById);
-//   } catch (error) {
-//     res.status(error.code).send(error.message);
-//   }
-// });
 
 export default router;
