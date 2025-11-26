@@ -64,19 +64,28 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
     // replies: [],
   };
 
-  const postById = await getPostById(postId);
-  if (postById === null) throw notFoundError("Post doesn't exist!");
   const postsCollection = await communityPosts();
+
+  // Quick existence check without fetching full post data
+  const postExists = await postsCollection.findOne(
+    { _id: new ObjectId(postId) },
+    { projection: { _id: 1 } }
+  );
+  if (!postExists) throw notFoundError("Post doesn't exist!");
+
   const updatedInfo = await postsCollection.updateOne(
     { _id: new ObjectId(postId) },
     { $push: { postComments: newComment } }
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Comment could not be posted!");
-  const updatedPost = await getPostById(postId);
+
+  // Invalidate cache
   await client.hDel("posts", postId.toString());
-  await client.hSet("posts", postId.toString(), JSON.stringify(updatedPost));
-  return updatedPost;
+
+  // Return the new comment directly instead of fetching the whole post
+  newComment._id = newComment._id.toString();
+  return newComment;
 };
 
 const deleteComment = async (postId, commentId) => {

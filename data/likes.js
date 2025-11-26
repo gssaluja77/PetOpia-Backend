@@ -12,7 +12,6 @@ const likePost = async (userId, postId) => {
 
   const postsCollection = await communityPosts();
 
-  // Quick existence check without fetching full post data
   const postExists = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
     { projection: { _id: 1 } }
@@ -26,10 +25,8 @@ const likePost = async (userId, postId) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Like not updated!");
 
-  // Invalidate cache so next read fetches fresh data
   await client.hDel("posts", postId.toString());
 
-  // Only fetch the postLikes array, not the entire post
   const { postLikes } = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
     { projection: { postLikes: 1 } }
@@ -46,7 +43,6 @@ const unlikePost = async (userId, postId) => {
 
   const postsCollection = await communityPosts();
 
-  // Quick existence check without fetching full post data
   const postExists = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
     { projection: { _id: 1 } }
@@ -60,10 +56,8 @@ const unlikePost = async (userId, postId) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Unlike not updated!");
 
-  // Invalidate cache so next read fetches fresh data
   await client.hDel("posts", postId.toString());
 
-  // Only fetch the postLikes array, not the entire post
   const { postLikes } = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
     { projection: { postLikes: 1 } }
