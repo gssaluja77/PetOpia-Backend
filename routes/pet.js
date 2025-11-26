@@ -166,12 +166,16 @@ router
 
       if (userData) {
         data = await client.get(userId);
-        data = JSON.parse(data);
+        // Handle both string (IORedis) and object (Upstash) responses
+        if (typeof data === 'string') {
+          data = JSON.parse(data);
+        }
       } else {
         data = await getAllPets(userId);
       }
       res.status(200).send(data);
     } catch (e) {
+      console.error('Error fetching pets:', e);
       res.status(404).send({ error: e });
     }
   })
