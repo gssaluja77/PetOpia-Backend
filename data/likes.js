@@ -1,6 +1,5 @@
 import { ObjectId } from "mongodb";
 import { communityPosts } from "../config/mongoCollections.js";
-import { getPostById } from "./communityPosts.js";
 import { validateObjectId } from "../helpers/validations.js";
 import { internalServerError, notFoundError } from "../helpers/wrappers.js";
 
@@ -11,8 +10,13 @@ const likePost = async (userId, postId) => {
   postId = postId.trim();
 
   const postsCollection = await communityPosts();
-  const postById = await getPostById(postId.toString());
-  if (postById === null) notFoundError("Post doesn't exist!");
+
+  // Quick existence check without fetching full post data
+  const postExists = await postsCollection.findOne(
+    { _id: new ObjectId(postId) },
+    { projection: { _id: 1 } }
+  );
+  if (!postExists) notFoundError("Post doesn't exist!");
 
   const updatedInfo = await postsCollection.updateOne(
     { _id: new ObjectId(postId) },
@@ -20,7 +24,13 @@ const likePost = async (userId, postId) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Like not updated!");
-  const { postLikes } = await getPostById(postId);
+
+  // Only fetch the postLikes array, not the entire post
+  const { postLikes } = await postsCollection.findOne(
+    { _id: new ObjectId(postId) },
+    { projection: { postLikes: 1 } }
+  );
+
   return { liked: true, likesLength: postLikes.length };
 };
 
@@ -31,8 +41,13 @@ const unlikePost = async (userId, postId) => {
   postId = postId.trim();
 
   const postsCollection = await communityPosts();
-  const postById = await getPostById(postId);
-  if (postById === null) throw notFoundError("Post doesn't exist!");
+
+  // Quick existence check without fetching full post data
+  const postExists = await postsCollection.findOne(
+    { _id: new ObjectId(postId) },
+    { projection: { _id: 1 } }
+  );
+  if (!postExists) throw notFoundError("Post doesn't exist!");
 
   const updatedInfo = await postsCollection.updateOne(
     { _id: new ObjectId(postId) },
@@ -40,7 +55,13 @@ const unlikePost = async (userId, postId) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Unlike not updated!");
-  const { postLikes } = await getPostById(postId);
+
+  // Only fetch the postLikes array, not the entire post
+  const { postLikes } = await postsCollection.findOne(
+    { _id: new ObjectId(postId) },
+    { projection: { postLikes: 1 } }
+  );
+
   return { liked: false, likesLength: postLikes.length };
 };
 
