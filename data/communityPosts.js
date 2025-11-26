@@ -22,7 +22,9 @@ const getAllPosts = async (page = 1) => {
   const field = `page_${page}`;
   const cachedData = await client.hGet(cacheKey, field);
   if (cachedData) {
-    return JSON.parse(cachedData);
+    return typeof cachedData === "string"
+      ? JSON.parse(cachedData)
+      : cachedData;
   }
 
   const postsCollection = await communityPosts();
