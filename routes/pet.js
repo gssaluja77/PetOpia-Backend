@@ -166,7 +166,6 @@ router
 
       if (userData) {
         data = await client.get(userId);
-        // Handle both string (IORedis) and object (Upstash) responses
         if (typeof data === 'string') {
           data = JSON.parse(data);
         }
