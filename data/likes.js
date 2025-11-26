@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { communityPosts } from "../config/mongoCollections.js";
 import { validateObjectId } from "../helpers/validations.js";
 import { internalServerError, notFoundError } from "../helpers/wrappers.js";
+import client from "../config/redisClient.js";
 
 const likePost = async (userId, postId) => {
   validateObjectId(userId, "User ID");
@@ -24,6 +25,9 @@ const likePost = async (userId, postId) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Like not updated!");
+
+  // Invalidate cache so next read fetches fresh data
+  await client.hDel("posts", postId.toString());
 
   // Only fetch the postLikes array, not the entire post
   const { postLikes } = await postsCollection.findOne(
@@ -55,6 +59,9 @@ const unlikePost = async (userId, postId) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Unlike not updated!");
+
+  // Invalidate cache so next read fetches fresh data
+  await client.hDel("posts", postId.toString());
 
   // Only fetch the postLikes array, not the entire post
   const { postLikes } = await postsCollection.findOne(
