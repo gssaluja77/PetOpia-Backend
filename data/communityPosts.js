@@ -16,6 +16,14 @@ import client from "../config/redisClient.js";
 const getAllPosts = async (page = 1) => {
   const limit = 4;
   if (!Number.isInteger(page)) page = Number(page);
+
+  // Check Redis Cache
+  const cacheKey = `all_posts_page_${page}`;
+  const cachedData = await client.get(cacheKey);
+  if (cachedData) {
+    return JSON.parse(cachedData);
+  }
+
   const postsCollection = await communityPosts();
   const allPostsData = await postsCollection
     .find()
@@ -23,13 +31,15 @@ const getAllPosts = async (page = 1) => {
     .toArray();
   const numberOfDocs = await postsCollection.countDocuments();
   if (page < 1) throw badRequestError("Invalid page number in URL!");
+
+  let result;
   if (page === 1) {
     const allPosts = await postsCollection
       .find({})
       .sort({ $natural: -1 })
       .limit(limit)
       .toArray();
-    return {
+    result = {
       allPosts: allPosts,
       allPostsData: allPostsData,
       numberOfDocs: numberOfDocs,
@@ -43,13 +53,17 @@ const getAllPosts = async (page = 1) => {
       .limit(limit)
       .toArray();
     if (!allPosts.length) throw notFoundError("There are no more posts!");
-    return {
+    result = {
       allPosts: allPosts,
       allPostsData: allPostsData,
       numberOfDocs: numberOfDocs,
       limit: limit,
     };
   }
+
+  // Cache the result for 5 minutes
+  await client.setex(cacheKey, 300, JSON.stringify(result));
+  return result;
 };
 
 const getPostById = async (postId) => {

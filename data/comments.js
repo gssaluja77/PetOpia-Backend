@@ -80,8 +80,13 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Comment could not be posted!");
 
-  // Invalidate cache
-  await client.hDel("posts", postId.toString());
+  // Write-through caching: Update Redis directly
+  let cachedPost = await client.hGet("posts", postId.toString());
+  if (cachedPost) {
+    if (typeof cachedPost === 'string') cachedPost = JSON.parse(cachedPost);
+    cachedPost.postComments.push(newComment);
+    await client.hSet("posts", postId.toString(), JSON.stringify(cachedPost));
+  }
 
   // Return the new comment directly instead of fetching the whole post
   newComment._id = newComment._id.toString();
@@ -102,8 +107,7 @@ const deleteComment = async (postId, commentId) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Comment could not be deleted!");
   const updatedPost = await getPostById(postId);
-  await client.hDel("posts", postId.toString());
-  await client.hSet("posts", postId.toString(), JSON.stringify(updatedPost));
+  // getPostById updates the cache, so we don't need explicit hDel/hSet here.
   return updatedPost;
 };
 
@@ -146,8 +150,7 @@ const likeComment = async (userId, postId, commentId) => {
   const commentLiked = await getCommentByCommentId(postId, commentId);
   // commentLiked._id = commentLiked._id.toString();
   const updatedPost = await getPostById(postId);
-  await client.hDel("posts", postId.toString());
-  await client.hSet("posts", postId.toString(), JSON.stringify(updatedPost));
+  // getPostById updates the cache, so we don't need explicit hDel/hSet here.
   return { liked: true, likesLength: commentLiked.commentLikes.length };
 };
 
@@ -171,8 +174,7 @@ const unlikeComment = async (userId, postId, commentId) => {
   const commentLiked = await getCommentByCommentId(postId, commentId);
   commentLiked._id = commentLiked._id.toString();
   const updatedPost = await getPostById(postId);
-  await client.hDel("posts", postId.toString());
-  await client.hSet("posts", postId.toString(), JSON.stringify(updatedPost));
+  // getPostById updates the cache, so we don't need explicit hDel/hSet here.
   return { liked: true, likesLength: commentLiked.commentLikes.length };
 };
 

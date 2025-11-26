@@ -25,7 +25,15 @@ const likePost = async (userId, postId) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Like not updated!");
 
-  await client.hDel("posts", postId.toString());
+  // Write-through caching: Update Redis directly
+  let cachedPost = await client.hGet("posts", postId.toString());
+  if (cachedPost) {
+    if (typeof cachedPost === 'string') cachedPost = JSON.parse(cachedPost);
+    if (!cachedPost.postLikes.includes(userId)) {
+      cachedPost.postLikes.push(userId);
+      await client.hSet("posts", postId.toString(), JSON.stringify(cachedPost));
+    }
+  }
 
   const { postLikes } = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
@@ -56,7 +64,13 @@ const unlikePost = async (userId, postId) => {
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Unlike not updated!");
 
-  await client.hDel("posts", postId.toString());
+  // Write-through caching: Update Redis directly
+  let cachedPost = await client.hGet("posts", postId.toString());
+  if (cachedPost) {
+    if (typeof cachedPost === 'string') cachedPost = JSON.parse(cachedPost);
+    cachedPost.postLikes = cachedPost.postLikes.filter(id => id !== userId);
+    await client.hSet("posts", postId.toString(), JSON.stringify(cachedPost));
+  }
 
   const { postLikes } = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
