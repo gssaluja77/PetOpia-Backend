@@ -3,8 +3,8 @@ import { communityPosts } from "../config/mongoCollections.js";
 import { getPostById } from "./communityPosts.js";
 import { validateObjectId, validateString } from "../helpers/validations.js";
 import { internalServerError, notFoundError } from "../helpers/wrappers.js";
+import moment from "moment";
 import client from "../config/redisClient.js";
-
 
 const getCommentByCommentId = async (postId, commentId) => {
   validateObjectId(commentId, "Comment ID");
@@ -42,8 +42,8 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
     _id: new ObjectId(),
     userThatPosted: userThatPosted,
     userEmail: userEmail,
-    commentDate: date.toLocaleDateString('en-US', { dateStyle: "long" }),
-    commentTime: date.toLocaleTimeString('en-US', { timeStyle: "short" }),
+    commentDate: moment().format("MMM Do YYYY"),
+    commentTime: moment().format("h:mm A"),
     comment: comment,
     commentLikes: [],
   };
@@ -65,7 +65,7 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
 
   let cachedPost = await client.hGet("posts", postId.toString());
   if (cachedPost) {
-    if (typeof cachedPost === 'string') cachedPost = JSON.parse(cachedPost);
+    if (typeof cachedPost === "string") cachedPost = JSON.parse(cachedPost);
     cachedPost.postComments.push(newComment);
     await client.hSet("posts", postId.toString(), JSON.stringify(cachedPost));
   }
