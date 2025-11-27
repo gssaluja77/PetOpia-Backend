@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { communityPosts } from "../config/mongoCollections.js";
-import moment from "moment"
+import moment from "moment";
 import {
   badRequestError,
   internalServerError,
@@ -21,9 +21,7 @@ const getAllPosts = async (page = 1) => {
   const field = `page_${page}`;
   const cachedData = await client.hGet(cacheKey, field);
   if (cachedData) {
-    return typeof cachedData === "string"
-      ? JSON.parse(cachedData)
-      : cachedData;
+    return typeof cachedData === "string" ? JSON.parse(cachedData) : cachedData;
   }
 
   const postsCollection = await communityPosts();

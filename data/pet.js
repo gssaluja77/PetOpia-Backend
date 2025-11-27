@@ -59,7 +59,15 @@ const createPet = async (
   return getAllPets(userId);
 };
 
-const updatePet = async (userId, petId, petName, petAge, petType, petBreed, petImage) => {
+const updatePet = async (
+  userId,
+  petId,
+  petName,
+  petAge,
+  petType,
+  petBreed,
+  petImage
+) => {
   const collection = await users();
 
   let updateFields = {};
@@ -84,7 +92,7 @@ const updatePet = async (userId, petId, petName, petAge, petType, petBreed, petI
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   await client.set(userId, JSON.stringify(user.pets));
 
-  const updatedPet = user.pets.find(p => p._id.toString() === petId);
+  const updatedPet = user.pets.find((p) => p._id.toString() === petId);
   return updatedPet;
 };
 
@@ -96,11 +104,11 @@ const deletePet = async (userId, petId) => {
     { $pull: { pets: { _id: new ObjectId(petId) } } }
   );
 
-  if (update.modifiedCount === 0) throw internalServerError("Could not delete pet successfully");
+  if (update.modifiedCount === 0)
+    throw internalServerError("Could not delete pet successfully");
 
   return await getAllPets(userId);
 };
-
 
 const createMed = async (
   userId,
@@ -129,7 +137,7 @@ const createMed = async (
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   await client.set(userId, JSON.stringify(user.pets));
 
-  const updatedPet = user.pets.find(p => p._id.toString() === petId);
+  const updatedPet = user.pets.find((p) => p._id.toString() === petId);
   return updatedPet;
 };
 
@@ -147,10 +155,9 @@ const deleteMed = async (userId, petId, medId) => {
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   await client.set(userId, JSON.stringify(user.pets));
 
-  const updatedPet = user.pets.find(p => p._id.toString() === petId);
+  const updatedPet = user.pets.find((p) => p._id.toString() === petId);
   return updatedPet;
 };
-
 
 const createApp = async (
   userId,
@@ -179,7 +186,7 @@ const createApp = async (
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   await client.set(userId, JSON.stringify(user.pets));
 
-  const updatedPet = user.pets.find(p => p._id.toString() === petId);
+  const updatedPet = user.pets.find((p) => p._id.toString() === petId);
   return updatedPet;
 };
 
@@ -197,10 +204,9 @@ const deleteApp = async (userId, petId, appId) => {
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   await client.set(userId, JSON.stringify(user.pets));
 
-  const updatedPet = user.pets.find(p => p._id.toString() === petId);
+  const updatedPet = user.pets.find((p) => p._id.toString() === petId);
   return updatedPet;
 };
-
 
 const createPres = async (userId, petId, imageUrl) => {
   const collection = await users();
@@ -216,7 +222,7 @@ const createPres = async (userId, petId, imageUrl) => {
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   await client.set(userId, JSON.stringify(user.pets));
 
-  const updatedPet = user.pets.find(p => p._id.toString() === petId);
+  const updatedPet = user.pets.find((p) => p._id.toString() === petId);
   return updatedPet;
 };
 
@@ -234,7 +240,7 @@ const deletePres = async (userId, petId, imageUrl) => {
   const user = await collection.findOne({ _id: new ObjectId(userId) });
   await client.set(userId, JSON.stringify(user.pets));
 
-  const updatedPet = user.pets.find(p => p._id.toString() === petId);
+  const updatedPet = user.pets.find((p) => p._id.toString() === petId);
   return updatedPet;
 };
 
@@ -253,8 +259,8 @@ const medicationReminder = async () => {
         reminderDate.setDate(reminderDate.getDate() + 1);
 
         const year = reminderDate.getFullYear();
-        const month = String(reminderDate.getMonth() + 1).padStart(2, '0');
-        const day = String(reminderDate.getDate()).padStart(2, '0');
+        const month = String(reminderDate.getMonth() + 1).padStart(2, "0");
+        const day = String(reminderDate.getDate()).padStart(2, "0");
         const convertedDate = `${year}-${month}-${day}`;
 
         if (medication.administeredDate === convertedDate) {
@@ -285,8 +291,8 @@ const appointmentReminder = async () => {
         reminderDate.setDate(reminderDate.getDate() + 1);
 
         const year = reminderDate.getFullYear();
-        const month = String(reminderDate.getMonth() + 1).padStart(2, '0');
-        const day = String(reminderDate.getDate()).padStart(2, '0');
+        const month = String(reminderDate.getMonth() + 1).padStart(2, "0");
+        const day = String(reminderDate.getDate()).padStart(2, "0");
         const convertedDate = `${year}-${month}-${day}`;
 
         if (appointment.appointmentDate === convertedDate) {

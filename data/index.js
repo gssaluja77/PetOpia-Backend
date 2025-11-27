@@ -1,5 +1,3 @@
-let pet = require('./pet');
+let pet = require("./pet");
 
-export {
-    pet
-}
+export { pet };

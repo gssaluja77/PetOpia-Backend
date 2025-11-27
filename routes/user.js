@@ -17,7 +17,6 @@ router.route("/signup").post(async (req, res) => {
 
     res.status(200).send(data);
   } catch (error) {
-
     let status = 400;
     if (error.message.includes("already exists")) status = 409;
     res.status(status).json({ error: error.message });
@@ -37,7 +36,6 @@ router.route("/login").post(async (req, res) => {
 
     res.status(200).send(data);
   } catch (error) {
-
     res.status(400).json({ error: error.message });
   }
 });

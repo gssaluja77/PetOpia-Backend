@@ -3,8 +3,8 @@ import configRoutes from "./routes/index.js";
 import { appointmentReminder, medicationReminder } from "./data/pet.js";
 import cron from "node-cron";
 import path from "path";
-import { fileURLToPath } from 'url';
-import cors from 'cors';
+import { fileURLToPath } from "url";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,8 +27,6 @@ cron.schedule("0 8 * * *", async () => {
     console.error("Error running reminders:", error);
   }
 });
-
-
 
 const port = process.env.PORT || 8000;
 const host = "0.0.0.0";

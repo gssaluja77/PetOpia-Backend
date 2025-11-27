@@ -9,35 +9,33 @@ import {
 } from "../data/comments.js";
 const router = express.Router();
 
-router
-  .route("/:postId")
-  .post(async (req, res) => {
-    try {
-      const postedComment = await postComment(
-        req.params.postId,
-        xss(req.body.userEmail),
-        xss(req.body.userThatPosted),
-        xss(req.body.comment)
-      );
-      res.json(postedComment);
-    } catch (error) {
-      let status = 500;
-      if (error.code && error.code >= 100 && error.code < 600) {
-        status = error.code;
-      }
-      res.status(status).send(error.message);
+router.route("/:postId").post(async (req, res) => {
+  try {
+    const postedComment = await postComment(
+      req.params.postId,
+      xss(req.body.userEmail),
+      xss(req.body.userThatPosted),
+      xss(req.body.comment)
+    );
+    res.json(postedComment);
+  } catch (error) {
+    let status = 500;
+    if (error.code && error.code >= 100 && error.code < 600) {
+      status = error.code;
     }
-  });
-router.route("/:postId/:commentId")
+    res.status(status).send(error.message);
+  }
+});
+router
+  .route("/:postId/:commentId")
   .delete(async (req, res) => {
     try {
       const postAfterDeletion = await deleteComment(
         req.params.postId,
-        req.params.commentId,
+        req.params.commentId
       );
       res.json(postAfterDeletion);
     } catch (error) {
-
       let status = 500;
       if (error.code && error.code >= 100 && error.code < 600) {
         status = error.code;
@@ -68,7 +66,6 @@ router.route("/:postId/:commentId")
       );
       res.json(commentLiked);
     } catch (error) {
-
       let status = 500;
       if (error.code && error.code >= 100 && error.code < 600) {
         status = error.code;

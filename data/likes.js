@@ -27,7 +27,7 @@ const likePost = async (userId, postId) => {
 
   let cachedPost = await client.hGet("posts", postId.toString());
   if (cachedPost) {
-    if (typeof cachedPost === 'string') cachedPost = JSON.parse(cachedPost);
+    if (typeof cachedPost === "string") cachedPost = JSON.parse(cachedPost);
     if (!cachedPost.postLikes.includes(userId)) {
       cachedPost.postLikes.push(userId);
       await client.hSet("posts", postId.toString(), JSON.stringify(cachedPost));
@@ -67,8 +67,8 @@ const unlikePost = async (userId, postId) => {
 
   let cachedPost = await client.hGet("posts", postId.toString());
   if (cachedPost) {
-    if (typeof cachedPost === 'string') cachedPost = JSON.parse(cachedPost);
-    cachedPost.postLikes = cachedPost.postLikes.filter(id => id !== userId);
+    if (typeof cachedPost === "string") cachedPost = JSON.parse(cachedPost);
+    cachedPost.postLikes = cachedPost.postLikes.filter((id) => id !== userId);
     await client.hSet("posts", postId.toString(), JSON.stringify(cachedPost));
   }
 

@@ -55,7 +55,7 @@ const validateName = (inputName, inputParameter) => {
     if (inputName.length < 2 || format.test(inputName)) {
       throw badRequestError(
         inputParameter +
-        " must be atleast 2 characters long and should not contain any special characters or numbers!"
+          " must be atleast 2 characters long and should not contain any special characters or numbers!"
       );
     }
   }

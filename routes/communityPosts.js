@@ -17,7 +17,6 @@ router.route("/").get(async (req, res) => {
     const searchedData = await searchPosts(req.query.keyword);
     res.json({ allData: allData, searchedData: searchedData });
   } catch (error) {
-
     let status = 500;
     if (error.code && error.code >= 100 && error.code < 600) {
       status = error.code;
@@ -57,7 +56,7 @@ router
       );
       if (postExistsInCache) {
         postById = await client.hGet("posts", req.params.postId.toString());
-        if (typeof postById === 'string') {
+        if (typeof postById === "string") {
           postById = JSON.parse(postById);
         }
       } else {
