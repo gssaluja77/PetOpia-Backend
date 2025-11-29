@@ -244,44 +244,12 @@ const deletePres = async (userId, petId, imageUrl) => {
   return updatedPet;
 };
 
-const medicationReminder = async () => {
-  const userCollection = await users();
-  const cursor = userCollection.find({});
-
-  for await (const user of cursor) {
-    if (!user.pets) continue;
-
-    for (const pet of user.pets) {
-      if (!pet.medications) continue;
-
-      for (const medication of pet.medications) {
-        const reminderDate = new Date();
-        reminderDate.setDate(reminderDate.getDate() + 1);
-
-        const year = reminderDate.getFullYear();
-        const month = String(reminderDate.getMonth() + 1).padStart(2, "0");
-        const day = String(reminderDate.getDate()).padStart(2, "0");
-        const convertedDate = `${year}-${month}-${day}`;
-
-        if (medication.administeredDate === convertedDate) {
-          await emailSender(
-            user.email.toString(),
-            "Medication",
-            pet.petName.toString(),
-            `You have your pet ${pet.petName}'s medication tomorrow!`
-          );
-        }
-      }
-    }
-  }
-};
-
 const appointmentReminder = async () => {
   const userCollection = await users();
   const cursor = userCollection.find({});
 
   for await (const user of cursor) {
-    if (!user.pets) continue;
+    if (!user.pets.length) continue;
 
     for (const pet of user.pets) {
       if (!pet.appointments) continue;
@@ -296,12 +264,14 @@ const appointmentReminder = async () => {
         const convertedDate = `${year}-${month}-${day}`;
 
         if (appointment.appointmentDate === convertedDate) {
-          await emailSender(
-            user.email.toString(),
-            "Appointment",
-            pet.petName.toString(),
-            `You have your pet ${pet.petName}'s appointment tomorrow!`
-          );
+          const userEmail = user.email.toString();
+          const petName = pet.petName.toString();
+          const html = `<p>Dear ${user.firstName},</p>
+                        <p>This is a friendly reminder that you have an appointment for your pet, ${pet.petName}, scheduled for tomorrow (${appointment.appointmentDate}) at ${appointment.clinicName} regarding ${appointment.reason}.</p>
+                        <br />
+                        <p>Best regards,<br/>The PetOpia Team</p>`;
+
+          await emailSender(userEmail, "Appointment", petName, html);
         }
       }
     }
@@ -320,6 +290,5 @@ export {
   deleteApp,
   createPres,
   deletePres,
-  medicationReminder,
   appointmentReminder,
 };

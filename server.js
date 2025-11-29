@@ -1,6 +1,6 @@
 import express from "express";
 import configRoutes from "./routes/index.js";
-import { appointmentReminder, medicationReminder } from "./data/pet.js";
+import { appointmentReminder } from "./data/pet.js";
 import cron from "node-cron";
 import path from "path";
 import { fileURLToPath } from "url";

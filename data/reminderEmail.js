@@ -4,10 +4,10 @@ dotenv.config();
 
 const emailSender = async (toAddress, forWhat, forWhom, content) => {
   const mailOptions = {
-    from: process.env.EMAIL,
+    from: `"PetOpia" <${process.env.EMAIL}>`,
     to: toAddress,
     subject: `${forWhat} reminder for ${forWhom} from PetOpia!`,
-    text: content,
+    html: content,
   };
 
   const transporter = nodemailer.createTransport({

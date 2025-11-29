@@ -35,31 +35,6 @@ const validateObjectId = (inputId, inputParameter) => {
   if (!ObjectId.isValid(inputId.trim()))
     throw badRequestError(`Invalid ${inputParameter}!`);
 };
-const validateName = (inputName, inputParameter) => {
-  /**
-   * @param {inputName} string
-   * @param {inputParameter} string
-   */
-  if (!inputName) throw badRequestError(`Please provide ${inputParameter}!`);
-  if (typeof inputName !== "string" || typeof inputName === undefined)
-    throw badRequestError(inputParameter + " must be a string!");
-  if (inputName.trim().length === 0)
-    throw badRequestError(
-      inputParameter + " cannot be an empty string or string with just spaces!"
-    );
-  const name = inputName.trim().split(" ");
-  if (name.length > 1) {
-    throw badRequestError(inputParameter + " should be in valid format!");
-  } else {
-    let format = /[`0123456789!@#$%^&*()_+\-=\[\]{};:"\\|,.<>\/?~]/;
-    if (inputName.length < 2 || format.test(inputName)) {
-      throw badRequestError(
-        inputParameter +
-          " must be atleast 2 characters long and should not contain any special characters or numbers!"
-      );
-    }
-  }
-};
 
 const validatePostTitle = (postTitle, inputParameter) => {
   /**
@@ -93,6 +68,7 @@ const validateEmail = (inputEmail) => {
   if (!emailFormat.test(inputEmail))
     throw badRequestError("Please enter a valid email address!");
 };
+
 const validatePhoneNumber = (inputPhoneNumber) => {
   /**
    * @param {inputPhoneNumber}
@@ -141,7 +117,6 @@ const validatePetAge = (petAge) => {
 
 export {
   validateObjectId,
-  validateName,
   validateString,
   validateEmail,
   validatePhoneNumber,

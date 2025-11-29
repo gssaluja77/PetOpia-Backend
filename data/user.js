@@ -8,16 +8,22 @@ import client from "../config/redisClient.js";
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
-const registerUser = async (email, password) => {
+const registerUser = async (firstName, lastName, email, password) => {
   const collection = await users();
   const existingUser = await collection.findOne({ email: email });
 
   if (existingUser) {
     throw badRequestError("User already exists with that email");
   }
-
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, saltRounds);
+  } catch (e) {
+    throw internalServerError(e);
+  }
   const newUser = {
+    firstName,
+    lastName,
     email,
     hashedPassword,
     pets: [],
@@ -32,7 +38,7 @@ const registerUser = async (email, password) => {
   return { id, email };
 };
 
-const checkUser = async (email, password) => {
+const loginUser = async (email, password) => {
   const collection = await users();
   const user = await collection.findOne({ email: email });
   if (!user) {
@@ -45,7 +51,12 @@ const checkUser = async (email, password) => {
   }
 
   await client.set(email, user._id.toString());
-  return { id: user._id.toString(), email: user.email };
+  return {
+    id: user._id.toString(),
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+  };
 };
 
-export { registerUser, checkUser };
+export { registerUser, loginUser };
