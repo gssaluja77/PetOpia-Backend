@@ -10,6 +10,7 @@ const dbConnection = async () => {
     if (process.env.NODE_ENV === "development") {
       _connection = await MongoClient.connect(process.env.DATABASE_URL_LOCAL);
       _db = await _connection.db(process.env.DATABASE_NAME);
+      console.log("Local MongoDB connected");
     } else {
       _connection = await MongoClient.connect(process.env.MONGODB_URI);
       _db = await _connection.db(process.env.DATABASE_NAME);
