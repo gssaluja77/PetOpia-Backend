@@ -21,7 +21,6 @@ configRoutes(app);
 
 cron.schedule("0 8 * * *", async () => {
   try {
-    await medicationReminder();
     await appointmentReminder();
   } catch (error) {
     console.error("Error running reminders:", error);
