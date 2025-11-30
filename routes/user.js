@@ -22,7 +22,7 @@ router.route("/signup").post(async (req, res) => {
     res.status(200).send(data);
   } catch (error) {
     let status = 400;
-    // if (error.message.includes("already exists")) status = 409;
+    if (error.message.includes("already exists")) status = 409;
     res.status(status).json({ error: error.message });
   }
 });
