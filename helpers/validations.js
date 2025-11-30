@@ -88,13 +88,13 @@ const validatePhoneNumber = (inputPhoneNumber) => {
 };
 
 const validateUsername = (username) => {
-  if (!username || typeof username != "string" || username.trim().length === 0)
+  if (!username || typeof username != "string")
     throw badRequestError(`Missing username!`);
   username = username.trim();
-  const usernameRegex = /^[a-z0-9]{4,}$/i;
+  const usernameRegex = /^[a-z0-9]{2,}$/i;
   if (!usernameRegex.test(username))
     throw badRequestError(
-      `Invalid username: The username must be only alphanumeric and have atleast 4 characters!`
+      `Invalid username: The username must be alphanumeric and have atleast 2 characters!`
     );
 };
 
