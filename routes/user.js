@@ -1,23 +1,25 @@
 import { Router } from "express";
 const router = Router();
 import xss from "xss";
-import { validateEmail, validatePassword, validateString } from "../helpers/validations.js";
+import { validateEmail, validatePassword, validateString, validateUsername } from "../helpers/validations.js";
 import { registerUser, loginUser } from "../data/user.js";
 
 router.route("/signup").post(async (req, res) => {
   let input = req.body;
   let firstName = xss(input.firstName);
   let lastName = xss(input.lastName);
+  let username = xss(input.username);
   let email = xss(input.email);
   let password = input.password;
 
   try {
     validateString(firstName, "First Name");
     validateString(lastName, "Last Name");
+    validateUsername(username);
     validateEmail(email);
     validatePassword(password);
 
-    let data = await registerUser(firstName, lastName, email, password);
+    let data = await registerUser(firstName, lastName, username, email, password);
 
     res.status(200).send(data);
   } catch (error) {

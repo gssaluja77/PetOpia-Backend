@@ -4,11 +4,18 @@ import bcrypt from "bcrypt";
 import * as dotenv from "dotenv";
 
 import client from "../config/redisClient.js";
+import { validateEmail, validatePassword, validateString, validateUsername } from "../helpers/validations.js";
 
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
-const registerUser = async (firstName, lastName, email, password) => {
+const registerUser = async (firstName, lastName, username, email, password) => {
+  validateString(firstName, "First Name");
+  validateString(lastName, "Last Name");
+  validateUsername(username);
+  validateEmail(email);
+  validatePassword(password);
+
   const collection = await users();
   const existingUser = await collection.findOne({ email: email });
 
@@ -24,6 +31,7 @@ const registerUser = async (firstName, lastName, email, password) => {
   const newUser = {
     firstName,
     lastName,
+    username,
     email,
     hashedPassword,
     pets: [],
@@ -39,6 +47,8 @@ const registerUser = async (firstName, lastName, email, password) => {
 };
 
 const loginUser = async (email, password) => {
+  validateEmail(email);
+  validatePassword(password);
   const collection = await users();
   const user = await collection.findOne({ email: email });
   if (!user) {
@@ -53,7 +63,7 @@ const loginUser = async (email, password) => {
   await client.set(email, user._id.toString());
   return {
     id: user._id.toString(),
-    email: user.email,
+    username: user.username,
     firstName: user.firstName,
     lastName: user.lastName,
   };
