@@ -115,6 +115,21 @@ const validatePetAge = (petAge) => {
   if (petAge < 0) throw badRequestError("Pet age cannot be less than 0!");
 };
 
+const validateImagePath = (imageFile) => {
+  /**
+   * @param {imagePath} string
+   * @throws {validFormat}
+   */
+
+  if (imageFile.size > 10 * 1024 * 1024) {
+    throw badRequestError("Image size should not exceed 10MB");
+  }
+  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+  if (!allowedTypes.includes(imageFile.mimetype)) {
+    throw badRequestError("Only PNG, JPEG, or WEBP images are allowed!");
+  }
+};
+
 export {
   validateObjectId,
   validateString,
@@ -124,4 +139,5 @@ export {
   validatePassword,
   validatePetAge,
   validatePostTitle,
+  validateImagePath,
 };

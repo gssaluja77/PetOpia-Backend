@@ -2,15 +2,14 @@ import express from "express";
 import multer from "multer";
 import cloudinary from "../config/cloudinaryConfig.js";
 import { Readable } from "stream";
+import { validateImagePath } from "../helpers/validations.js";
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
-    }
+    validateImagePath(req.file);
 
     // Convert buffer to stream
     const bufferStream = new Readable();

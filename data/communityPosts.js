@@ -148,42 +148,29 @@ const editPost = async (
   validateString(postTitle, "Post title");
   validatePostTitle(postTitle, "Post title");
   validateString(postDescription, "Post description");
+  validateString(postImage, "Image path");
   postTitle = postTitle.trim();
   postDescription = postDescription.trim();
   userThatPosted = userThatPosted.trim();
+  postImage = postImage && validateString(postImage, "Image Path");
 
   let updatedPost;
   const oldData = await getPostById(postId);
   for (const comment of oldData.postComments) {
     comment._id = new ObjectId(comment._id);
   }
-  if (postImage) {
-    validateString(postImage, "Image path");
-    postImage = postImage.trim();
-    updatedPost = {
-      userThatPosted: oldData.userThatPosted,
-      postImage: postImage,
-      postTitle: postTitle,
-      postDescription: postDescription,
-      dateString: oldData.dateString,
-      postDate: oldData.postDate,
-      postTime: oldData.postTime,
-      postComments: oldData.postComments,
-      postLikes: oldData.postLikes,
-    };
-  } else {
-    updatedPost = {
-      userThatPosted: oldData.userThatPosted,
-      postImage: postImage,
-      postTitle: postTitle,
-      postDescription: postDescription,
-      dateString: oldData.dateString,
-      postDate: oldData.postDate,
-      postTime: oldData.postTime,
-      postComments: oldData.postComments,
-      postLikes: oldData.postLikes,
-    };
-  }
+
+  updatedPost = {
+    userThatPosted: oldData.userThatPosted,
+    postImage: postImage,
+    postTitle: postTitle,
+    postDescription: postDescription,
+    dateString: oldData.dateString,
+    postDate: oldData.postDate,
+    postTime: oldData.postTime,
+    postComments: oldData.postComments,
+    postLikes: oldData.postLikes,
+  };
 
   const postsCollection = await communityPosts();
   const updateInfo = await postsCollection.updateOne(
@@ -233,4 +220,11 @@ const searchPosts = async (keyword) => {
   return searchedPosts;
 };
 
-export { createPost, getAllPosts, getPostById, deletePost, editPost, searchPosts };
+export {
+  createPost,
+  getAllPosts,
+  getPostById,
+  deletePost,
+  editPost,
+  searchPosts,
+};
