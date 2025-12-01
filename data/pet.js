@@ -37,6 +37,12 @@ const createPet = async (
   petType,
   petBreed
 ) => {
+  if (!ObjectId.isValid(userId)) throw badRequestError("Invalid object ID");
+
+  if (!petName || !petAge || !petType || !petBreed || !Number(petAge)) {
+    throw badRequestError("Invalid input");
+  }
+
   const collection = await users();
   let newPet = {
     _id: new ObjectId(),
@@ -79,6 +85,13 @@ const updatePet = async (
 
   if (Object.keys(updateFields).length === 0) {
     throw badRequestError("You haven't made any changes!");
+  }
+
+  if (!ObjectId.isValid(userId) || !ObjectId.isValid(petId))
+    throw badRequestError("Invalid object ID");
+
+  if (!petName || !petAge || !petType || !petBreed || !Number(petAge)) {
+    throw badRequestError("Invalid input");
   }
 
   let update = await collection.updateOne(
