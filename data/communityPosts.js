@@ -7,9 +7,11 @@ import {
   notFoundError,
 } from "../helpers/wrappers.js";
 import {
+  validateEmail,
   validateObjectId,
   validatePostTitle,
   validateString,
+  validateUsername,
 } from "../helpers/validations.js";
 import client from "../config/redisClient.js";
 
@@ -83,15 +85,20 @@ const getPostById = async (postId) => {
   return postById;
 };
 
-const newPost = async (
+const createPost = async (
   userThatPosted,
-  userEmail,
+  username,
+  firstName,
+  lastName,
   postImage,
   postTitle,
   postDescription
 ) => {
   validateObjectId(userThatPosted, "User ID");
   validateString(userThatPosted, "User ID");
+  validateUsername(username);
+  validateString(firstName, "First Name");
+  validateString(lastName, "Last Name");
   if (postImage) {
     validateString(postImage, "Image path");
     postImage = postImage.trim();
@@ -103,9 +110,11 @@ const newPost = async (
   postDescription = postDescription.trim();
   userThatPosted = userThatPosted.trim();
 
-  const addPost = {
+  const newPost = {
     userThatPosted: userThatPosted,
-    userEmail: userEmail,
+    username: username,
+    firstName: firstName,
+    lastName: lastName,
     postImage: postImage,
     postTitle: postTitle,
     postDescription: postDescription,
@@ -115,16 +124,16 @@ const newPost = async (
     postLikes: [],
   };
   const postsCollection = await communityPosts();
-  const insertedInfo = await postsCollection.insertOne(addPost);
+  const insertedInfo = await postsCollection.insertOne(newPost);
 
   if (!insertedInfo.acknowledged)
     throw internalServerError("Could not add community post to the database!");
 
-  await client.hSet("posts", addPost._id.toString(), JSON.stringify(addPost));
+  await client.hSet("posts", newPost._id.toString(), JSON.stringify(newPost));
 
   await client.del("community_posts_pages");
 
-  return addPost;
+  return newPost;
 };
 
 const editPost = async (
@@ -224,4 +233,4 @@ const searchPosts = async (keyword) => {
   return searchedPosts;
 };
 
-export { newPost, getAllPosts, getPostById, deletePost, editPost, searchPosts };
+export { createPost, getAllPosts, getPostById, deletePost, editPost, searchPosts };

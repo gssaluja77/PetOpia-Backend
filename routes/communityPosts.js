@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  newPost,
+  createPost,
   deletePost,
   editPost,
   getAllPosts,
@@ -10,6 +10,12 @@ import {
 import xss from "xss";
 const router = express.Router();
 import client from "../config/redisClient.js";
+import {
+  validateObjectId,
+  validatePostTitle,
+  validateString,
+  validateUsername,
+} from "../helpers/validations.js";
 
 router.route("/").get(async (req, res) => {
   try {
@@ -26,16 +32,39 @@ router.route("/").get(async (req, res) => {
 });
 router.route("/").post(async (req, res) => {
   try {
-    const { userThatPosted, userEmail, postImage, postTitle, postDescription } =
-      req.body;
-    const addPost = await newPost(
+    let {
+      userThatPosted,
+      username,
+      firstName,
+      lastName,
+      postImage,
+      postTitle,
+      postDescription,
+    } = req.body;
+
+    validateObjectId(userThatPosted, "User ID");
+    validateString(userThatPosted, "User ID");
+    validateUsername(username);
+    validateString(firstName, "First Name");
+    validateString(lastName, "Last Name");
+    if (postImage) {
+      validateString(postImage, "Image path");
+      postImage = postImage.trim();
+    }
+    validateString(postTitle, "Post title");
+    validatePostTitle(postTitle, "Post title");
+    validateString(postDescription, "Post description");
+
+    const newPost = await createPost(
       xss(userThatPosted),
-      xss(userEmail),
-      postImage ? xss(postImage) : null,
+      xss(username),
+      xss(firstName),
+      xss(lastName),
+      postImage ? postImage : null,
       xss(postTitle),
       xss(postDescription)
     );
-    res.json(addPost);
+    res.json(newPost);
   } catch (error) {
     let status = 500;
     if (error.code && error.code >= 100 && error.code < 600) {
@@ -73,12 +102,21 @@ router
   })
   .put(async (req, res) => {
     try {
-      const { userThatPosted, postImage, postTitle, postDescription } =
+      let { userThatPosted, postImage, postTitle, postDescription } =
         req.body;
+      validateObjectId(userThatPosted, "User ID");
+      validateString(userThatPosted, "User ID");
+      validateString(postTitle, "Post title");
+      validatePostTitle(postTitle, "Post title");
+      validateString(postDescription, "Post description");
+      if (postImage) {
+        validateString(postImage, "Image path");
+        postImage = postImage.trim();
+      }
       const updatedPost = await editPost(
         req.params.postId,
         xss(userThatPosted),
-        xss(postImage),
+        postImage,
         xss(postTitle),
         xss(postDescription)
       );
