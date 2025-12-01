@@ -6,7 +6,7 @@ import likesRoute from "./likes.js";
 import uploadRoute from "./upload.js";
 
 const constructorMethod = (app) => {
-  app.use("/api/upload", uploadRoute);
+  app.use("/upload", uploadRoute);
   app.use("/community-posts", communityPostsRoute);
   app.use("/view-post", commentsRoute);
   app.use("/likes", likesRoute);
