@@ -1,7 +1,11 @@
 import { ObjectId } from "mongodb";
 import { communityPosts } from "../config/mongoCollections.js";
 import { getPostById } from "./communityPosts.js";
-import { validateObjectId, validateString } from "../helpers/validations.js";
+import {
+  validateObjectId,
+  validateString,
+  validateUsername,
+} from "../helpers/validations.js";
 import { internalServerError, notFoundError } from "../helpers/wrappers.js";
 import moment from "moment";
 import client from "../config/redisClient.js";
@@ -28,10 +32,19 @@ const getCommentByCommentId = async (postId, commentId) => {
   return commentObject;
 };
 
-const postComment = async (postId, userEmail, userThatPosted, comment) => {
+const postComment = async (
+  postId,
+  username,
+  userEmail,
+  userThatPosted,
+  comment
+) => {
   validateObjectId(postId, "Post ID");
   validateString(comment, "Comment");
+  validateUsername(username);
   validateObjectId(userThatPosted, "UserThatPosted");
+  username = username.trim();
+  userEmail = userEmail.trim();
   postId = postId.trim();
   comment = comment.trim();
   userThatPosted = userThatPosted.trim();
@@ -41,6 +54,7 @@ const postComment = async (postId, userEmail, userThatPosted, comment) => {
   const newComment = {
     _id: new ObjectId(),
     userThatPosted: userThatPosted,
+    username: username,
     userEmail: userEmail,
     commentDate: moment().format("MMM Do YYYY"),
     commentTime: moment().format("h:mm A"),

@@ -13,6 +13,7 @@ router.route("/:postId").post(async (req, res) => {
   try {
     const postedComment = await postComment(
       req.params.postId,
+      xss(req.body.username),
       xss(req.body.userEmail),
       xss(req.body.userThatPosted),
       xss(req.body.comment)
