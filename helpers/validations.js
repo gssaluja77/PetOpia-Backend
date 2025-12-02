@@ -117,7 +117,7 @@ const validatePetAge = (petAge) => {
 
 const validateImagePath = (imageFile) => {
   /**
-   * @param {imagePath} string
+   * @param {imagePath} fileObject
    * @throws {validFormat}
    */
 

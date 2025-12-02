@@ -47,10 +47,6 @@ router.route("/").post(async (req, res) => {
     validateUsername(username);
     validateString(firstName, "First Name");
     validateString(lastName, "Last Name");
-    if (postImage) {
-      validateString(postImage, "Image path");
-      postImage = postImage.trim();
-    }
     validateString(postTitle, "Post title");
     validatePostTitle(postTitle, "Post title");
     validateString(postDescription, "Post description");
@@ -109,10 +105,6 @@ router
       validateString(postTitle, "Post title");
       validatePostTitle(postTitle, "Post title");
       validateString(postDescription, "Post description");
-      if (postImage) {
-        validateString(postImage, "Image path");
-        postImage = postImage.trim();
-      }
       const updatedPost = await editPost(
         req.params.postId,
         xss(userThatPosted),

@@ -99,10 +99,6 @@ const createPost = async (
   validateUsername(username);
   validateString(firstName, "First Name");
   validateString(lastName, "Last Name");
-  if (postImage) {
-    validateString(postImage, "Image path");
-    postImage = postImage.trim();
-  }
   validateString(postTitle, "Post title");
   validatePostTitle(postTitle, "Post title");
   validateString(postDescription, "Post description");
@@ -148,11 +144,9 @@ const editPost = async (
   validateString(postTitle, "Post title");
   validatePostTitle(postTitle, "Post title");
   validateString(postDescription, "Post description");
-  validateString(postImage, "Image path");
   postTitle = postTitle.trim();
   postDescription = postDescription.trim();
   userThatPosted = userThatPosted.trim();
-  postImage = postImage && validateString(postImage, "Image Path");
 
   let updatedPost;
   const oldData = await getPostById(postId);
