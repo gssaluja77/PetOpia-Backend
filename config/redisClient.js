@@ -135,6 +135,23 @@ const safeClient = {
       console.error("Redis Del Error:", error);
     }
   },
+  async flushDb() {
+    if (!isConnected) return;
+    try {
+      await client.flushdb();
+    } catch (error) {
+      console.error("Redis flushDb Error:", error);
+    }
+  },
+  async quit() {
+    if (!isConnected) return;
+    try {
+      await client.quit();
+      isConnected = false;
+    } catch (error) {
+      console.error("Redis Disconnect Error:", error);
+    }
+  },
 };
 
 export default safeClient;

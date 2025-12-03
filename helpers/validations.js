@@ -56,12 +56,12 @@ const validatePostTitle = (postTitle, inputParameter) => {
 
 const validateEmail = (inputEmail) => {
   /**
-   * @param {inputEmail}
+   * @param {inputEmail} string
    * @throws {emailFormat}
    */
   let emailFormat =
     /^([a-zA-Z0-9_\-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
-  inputEmail = inputEmail.trim();
+  inputEmail = inputEmail.trim().toLowerCase();
   if (!inputEmail) throw badRequestError("You must provide an email address!");
   if (typeof inputEmail !== "string" || typeof inputEmail === undefined)
     throw badRequestError("Email address must be a string!");
@@ -88,9 +88,13 @@ const validatePhoneNumber = (inputPhoneNumber) => {
 };
 
 const validateUsername = (username) => {
+  /**
+   * @param {username} string
+   * @throws {validFormat}
+   */
   if (!username || typeof username != "string")
     throw badRequestError(`Missing username!`);
-  username = username.trim();
+  username = username.trim().toLowerCase();
   const usernameRegex = /^[a-z0-9]{2,}$/i;
   if (!usernameRegex.test(username))
     throw badRequestError(
@@ -99,6 +103,10 @@ const validateUsername = (username) => {
 };
 
 const validatePassword = (password) => {
+  /**
+   * @param {password} string
+   * @throws {validFormat}
+   */
   if (!password || typeof password != "string" || password.trim().length === 0)
     throw badRequestError(`Missing Password!`);
   if (password.trim().length < 8)

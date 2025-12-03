@@ -13,6 +13,9 @@ router.route("/signup").post(async (req, res) => {
   let password = input.password;
 
   try {
+    firstName = firstName.trim();
+    lastName = lastName.trim();
+    
     validateString(firstName, "First Name");
     validateString(lastName, "Last Name");
     validateUsername(username);

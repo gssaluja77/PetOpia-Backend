@@ -4,12 +4,20 @@ import bcrypt from "bcrypt";
 import * as dotenv from "dotenv";
 
 import client from "../config/redisClient.js";
-import { validateEmail, validatePassword, validateString, validateUsername } from "../helpers/validations.js";
+import {
+  validateEmail,
+  validatePassword,
+  validateString,
+  validateUsername,
+} from "../helpers/validations.js";
 
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
 
 const registerUser = async (firstName, lastName, username, email, password) => {
+  firstName = firstName.trim();
+  lastName = lastName.trim();
+
   validateString(firstName, "First Name");
   validateString(lastName, "Last Name");
   validateUsername(username);
@@ -17,11 +25,16 @@ const registerUser = async (firstName, lastName, username, email, password) => {
   validatePassword(password);
 
   const collection = await users();
-  const existingUser = await collection.findOne({ email: email });
+  const existingEmail = await collection.findOne({ email: email });
+  const existingUsername = await collection.findOne({ username: username });
 
-  if (existingUser) {
+  if (existingEmail) {
     throw badRequestError("User already exists with that email");
   }
+  if (existingUsername) {
+    throw badRequestError("User already exists with that username");
+  }
+
   let hashedPassword;
   try {
     hashedPassword = await bcrypt.hash(password, saltRounds);

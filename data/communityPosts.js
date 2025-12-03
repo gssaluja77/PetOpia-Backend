@@ -7,7 +7,6 @@ import {
   notFoundError,
 } from "../helpers/wrappers.js";
 import {
-  validateEmail,
   validateObjectId,
   validatePostTitle,
   validateString,

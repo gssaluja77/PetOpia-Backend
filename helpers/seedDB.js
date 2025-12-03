@@ -1,6 +1,7 @@
 import { closeConnection } from "../config/mongoConnection.js";
 import { users, communityPosts } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
+import client from "../config/redisClient.js";
 
 export const seedUsers = [
   {
@@ -70,8 +71,8 @@ export const seedPosts = [
     postTitle: "Staring problem",
     postDescription:
       "My cutie keeps staring without even blinking as soon as he sees someone😅🐶.",
-    postDate: "Dec 2nd 2025",
-    postTime: "12:11 AM",
+    postDate: "Mar 11th 2025",
+    postTime: "8:45 AM",
     postComments: [],
     postLikes: [],
   },
@@ -86,8 +87,8 @@ export const seedPosts = [
     postTitle: "Samuuu...",
     postDescription:
       "He was 7 years old when I lost him. I still miss him so much...!!😔",
-    postDate: "Dec 2nd 2025",
-    postTime: "12:13 AM",
+    postDate: "Sep 23rd 2025",
+    postTime: "3:17 PM",
     postComments: [],
     postLikes: [],
   },
@@ -101,8 +102,8 @@ export const seedPosts = [
       "https://res.cloudinary.com/dbjlccagd/image/upload/v1764634430/petopia/vco2edmkfatkazvwbde5.jpg",
     postTitle: "Kitty kitty...🐱",
     postDescription: "Meet me two new adopted cuties...❤️",
-    postDate: "Dec 2nd 2025",
-    postTime: "12:13 AM",
+    postDate: "Apr 5th 2025",
+    postTime: "10:02 PM",
     postComments: [],
     postLikes: [],
   },
@@ -117,35 +118,62 @@ export const seedPosts = [
     postTitle: "My dog has anxiety issue",
     postDescription:
       "Keeps looking out the window, doesn't bark at anyone, nor does he ever get excited :(",
-    postDate: "Dec 2nd 2025",
-    postTime: "12:14 AM",
+    postDate: "Feb 1st 2025",
+    postTime: "6:55 AM",
     postComments: [],
     postLikes: [],
   },
 ];
 
 const seedDB = async () => {
-  const userCollection = await users();
-  const postsCollection = await communityPosts();
+  console.log("Waiting for Redis connection to stabilize...");
+  setTimeout(() => {}, 1000);
 
+  // Clear Redis cache before seeding
+  try {
+    console.log("Clearing Redis cache...");
+    await client.flushDb();
+    console.log("Redis cache cleared.");
+  } catch (error) {
+    console.error("Redis connection error during seeding:", error);
+  }
+
+  const userCollection = await users();
+  const postCollection = await communityPosts();
+
+  // Clear db collections
   try {
     console.log("Clearing existing collections...");
     await userCollection.deleteMany({});
-    await postsCollection.deleteMany({});
+    await postCollection.deleteMany({});
   } catch (e) {
     console.error("Error clearing collections:", e);
   }
+
+  // Seed data
   try {
     console.log("Seeding users...");
     await userCollection.insertMany(seedUsers);
     console.log("Seeding posts...");
-    await postsCollection.insertMany(seedPosts);
+    await postCollection.insertMany(seedPosts);
     console.log("Seeding completed.");
   } catch (e) {
     console.error("Error seeding data:", e);
-  } finally {
+  }
+
+  // Close connections
+  try {
     console.log("Closing database connection...");
     await closeConnection();
+  } catch (e) {
+    console.error("Error closing MongoDB connection:", e);
+  }
+
+  try {
+    console.log("Closing redis client connection...");
+    await client.quit();
+  } catch (e) {
+    console.error("Error closing Redis connection:", e);
   }
 };
 
