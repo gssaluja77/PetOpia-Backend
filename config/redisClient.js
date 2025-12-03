@@ -146,6 +146,7 @@ const safeClient = {
   async quit() {
     if (!isConnected) return;
     try {
+      if (isUpstash) return;
       await client.quit();
       isConnected = false;
     } catch (error) {
