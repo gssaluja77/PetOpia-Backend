@@ -2,14 +2,16 @@ import { closeConnection } from "../config/mongoConnection.js";
 import { users, communityPosts } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
 import client from "../config/redisClient.js";
+import moment from "moment";
 
-export const seedUsers = [
+const seedUsers = [
   {
     _id: new ObjectId("692df3ac08b2aa2aaad932a1"),
     firstName: "Gundeep",
     lastName: "Singh Saluja",
     username: "gssaluja",
     email: "gssaluja77@gmail.com",
+    joinedDate: "Aug 15th 2024",
     hashedPassword:
       "$2b$10$NIpGJC36WxLCwGhi2V7MjuvzeXc6GCsfr1ijbkqpJM6yrJzfRKm9q",
     pets: [
@@ -33,6 +35,7 @@ export const seedUsers = [
     lastName: "Thompson",
     username: "alicet_01",
     email: "alice.thompson@gmail.com",
+    joinedDate: "Oct 20th 2024",
     hashedPassword:
       "$2b$10$NIpGJC36WxLCwGhi2V7MjuvzeXc6GCsfr1ijbkqpJM6yrJzfRKm9q",
     pets: [],
@@ -43,6 +46,7 @@ export const seedUsers = [
     lastName: "Clark",
     username: "mclark_usa",
     email: "michael.clark33@gmail.com",
+    joinedDate: "Nov 15th 2024",
     hashedPassword:
       "$2b$10$NIpGJC36WxLCwGhi2V7MjuvzeXc6GCsfr1ijbkqpJM6yrJzfRKm9q",
     pets: [],
@@ -53,13 +57,14 @@ export const seedUsers = [
     lastName: "Sharma",
     username: "priya_sharma",
     email: "priya.sharma_in@gmail.com",
+    joinedDate: "Dec 9th 2024",
     hashedPassword:
       "$2b$10$NIpGJC36WxLCwGhi2V7MjuvzeXc6GCsfr1ijbkqpJM6yrJzfRKm9q",
     pets: [],
   },
 ];
 
-export const seedPosts = [
+const seedPosts = [
   {
     _id: new ObjectId("692e2ecdfceac4ba8f24b8dd"),
     userThatPosted: "656a84c6c0b3d7a8e1b9f0a1",
@@ -73,6 +78,7 @@ export const seedPosts = [
       "My cutie keeps staring without even blinking as soon as he sees someone😅🐶.",
     postDate: "Mar 11th 2025",
     postTime: "8:45 AM",
+    postTimestamp: new Date("2025-03-11T08:45:00.000Z"),
     postComments: [],
     postLikes: [],
   },
@@ -89,6 +95,7 @@ export const seedPosts = [
       "He was 7 years old when I lost him. I still miss him so much...!!😔",
     postDate: "Sep 23rd 2025",
     postTime: "3:17 PM",
+    postTimestamp: new Date("2025-09-23T15:17:00.000Z"),
     postComments: [],
     postLikes: [],
   },
@@ -104,6 +111,7 @@ export const seedPosts = [
     postDescription: "Meet me two new adopted cuties...❤️",
     postDate: "Apr 5th 2025",
     postTime: "10:02 PM",
+    postTimestamp: new Date("2025-04-05T22:02:00.000Z"),
     postComments: [],
     postLikes: [],
   },
@@ -120,26 +128,40 @@ export const seedPosts = [
       "Keeps looking out the window, doesn't bark at anyone, nor does he ever get excited :(",
     postDate: "Feb 1st 2025",
     postTime: "6:55 AM",
+    postTimestamp: new Date("2025-02-01T06:55:00.000Z"),
     postComments: [],
     postLikes: [],
   },
-];
+].sort((a, b) => {
+  const format = "MMM Do YYYY h:mm A";
+  const dateA = moment(a.postDate + " " + a.postTime, format);
+  const dateB = moment(b.postDate + " " + b.postTime, format);
+  if (!dateA.isValid() || !dateB.isValid()) {
+    return 0;
+  }
+  return dateB - dateA;
+});
 
 const seedDB = async () => {
-  console.log("Waiting for Redis connection to stabilize...");
-  setTimeout(() => {}, 1000);
+  await client.awaitConnection();
 
   // Clear Redis cache before seeding
   try {
     console.log("Clearing Redis cache...");
     await client.flushDb();
-    console.log("Redis cache cleared.");
   } catch (error) {
     console.error("Redis connection error during seeding:", error);
   }
 
   const userCollection = await users();
   const postCollection = await communityPosts();
+
+  try {
+    await postCollection.createIndex({ postTimestamp: -1 });
+    console.log("Index on postTimestamp created successfully.");
+  } catch (e) {
+    console.error("Error creating index on postTimestamp:", e);
+  }
 
   // Clear db collections
   try {
@@ -164,7 +186,7 @@ const seedDB = async () => {
   // Close connections
   try {
     console.log("Closing database connection...");
-    await closeConnection();
+    closeConnection();
   } catch (e) {
     console.error("Error closing MongoDB connection:", e);
   }

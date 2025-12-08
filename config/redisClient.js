@@ -4,20 +4,24 @@ import { Redis as UpstashRedis } from "@upstash/redis";
 let client = null;
 let isConnected = false;
 let isUpstash = false;
+let redisReadyPromise = null;
 
 const redisUrlLocal = process.env.REDIS_URL_LOCAL;
 
 if (process.env.NODE_ENV === "development") {
   client = new IORedis(redisUrlLocal);
 
-  client.on("error", (err) => {
-    console.error("Redis Error:", err.message);
-    isConnected = false;
-  });
+  redisReadyPromise = new Promise((resolve) => {
+    client.on("error", (err) => {
+      console.error("Redis Error:", err.message);
+      isConnected = false;
+    });
 
-  client.on("ready", () => {
-    console.log("Local Redis connected");
-    isConnected = true;
+    client.on("ready", () => {
+      console.log("Local Redis connected");
+      isConnected = true;
+      resolve();
+    });
   });
 } else {
   const url = process.env.KV_REST_API_URL;
@@ -43,6 +47,15 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const safeClient = {
+  // Await connection to IORedis in development
+  async awaitConnection() {
+    if (process.env.NODE_ENV === "development" && redisReadyPromise) {
+      console.log("Awaiting local Redis connection...");
+      return redisReadyPromise;
+    }
+    return;
+  },
+
   async get(key) {
     if (!isConnected) return null;
     try {

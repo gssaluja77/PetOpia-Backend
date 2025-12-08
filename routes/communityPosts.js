@@ -4,6 +4,7 @@ import {
   deletePost,
   editPost,
   getAllPosts,
+  getMyPosts,
   getPostById,
   searchPosts,
 } from "../data/communityPosts.js";
@@ -17,50 +18,67 @@ import {
   validateUsername,
 } from "../helpers/validations.js";
 
-router.route("/").get(async (req, res) => {
-  try {
-    const allData = await getAllPosts(req.query.page);
-    const searchedData = await searchPosts(req.query.keyword);
-    res.json({ allData: allData, searchedData: searchedData });
-  } catch (error) {
-    let status = 500;
-    if (error.code && error.code >= 100 && error.code < 600) {
-      status = error.code;
+router
+  .route("/community-posts")
+  .get(async (req, res) => {
+    try {
+      const allData = await getAllPosts(req.query.page);
+      const searchedData = await searchPosts(req.query.keyword);
+      res.json({ allData: allData, searchedData: searchedData });
+    } catch (error) {
+      let status = 500;
+      if (error.code && error.code >= 100 && error.code < 600) {
+        status = error.code;
+      }
+      res.status(status).send(error.message);
     }
-    res.status(status).send(error.message);
-  }
-});
-router.route("/").post(async (req, res) => {
+  })
+  .post(async (req, res) => {
+    try {
+      let {
+        userThatPosted,
+        username,
+        firstName,
+        lastName,
+        postImage,
+        postTitle,
+        postDescription,
+      } = req.body;
+
+      validateObjectId(userThatPosted, "User ID");
+      validateString(userThatPosted, "User ID");
+      validateUsername(username);
+      validateString(firstName, "First Name");
+      validateString(lastName, "Last Name");
+      validateString(postTitle, "Post title");
+      validatePostTitle(postTitle, "Post title");
+      validateString(postDescription, "Post description");
+
+      const newPost = await createPost(
+        xss(userThatPosted),
+        xss(username),
+        xss(firstName),
+        xss(lastName),
+        postImage ? postImage : null,
+        xss(postTitle),
+        xss(postDescription)
+      );
+      res.json(newPost);
+    } catch (error) {
+      let status = 500;
+      if (error.code && error.code >= 100 && error.code < 600) {
+        status = error.code;
+      }
+      res.status(status).send(error.message);
+    }
+  });
+
+router.route("/my-posts").get(async (req, res) => {
   try {
-    let {
-      userThatPosted,
-      username,
-      firstName,
-      lastName,
-      postImage,
-      postTitle,
-      postDescription,
-    } = req.body;
+    validateObjectId(req.query.userId, "User ID");
 
-    validateObjectId(userThatPosted, "User ID");
-    validateString(userThatPosted, "User ID");
-    validateUsername(username);
-    validateString(firstName, "First Name");
-    validateString(lastName, "Last Name");
-    validateString(postTitle, "Post title");
-    validatePostTitle(postTitle, "Post title");
-    validateString(postDescription, "Post description");
-
-    const newPost = await createPost(
-      xss(userThatPosted),
-      xss(username),
-      xss(firstName),
-      xss(lastName),
-      postImage ? postImage : null,
-      xss(postTitle),
-      xss(postDescription)
-    );
-    res.json(newPost);
+    const myPosts = await getMyPosts(req.query.userId, req.query.keyword);
+    res.json(myPosts);
   } catch (error) {
     let status = 500;
     if (error.code && error.code >= 100 && error.code < 600) {
@@ -71,9 +89,10 @@ router.route("/").post(async (req, res) => {
 });
 
 router
-  .route("/:postId")
+  .route("/community-posts/:postId")
   .get(async (req, res) => {
     try {
+      validateObjectId(req.params.postId, "Post ID");
       let postById;
       const postExistsInCache = await client.hExists(
         "posts",
@@ -98,8 +117,8 @@ router
   })
   .put(async (req, res) => {
     try {
-      let { userThatPosted, postImage, postTitle, postDescription } =
-        req.body;
+      validateObjectId(req.params.postId, "Post ID");
+      let { userThatPosted, postImage, postTitle, postDescription } = req.body;
       validateObjectId(userThatPosted, "User ID");
       validateString(userThatPosted, "User ID");
       validateString(postTitle, "Post title");
@@ -123,6 +142,7 @@ router
   })
   .delete(async (req, res) => {
     try {
+      validateObjectId(req.params.postId, "Post ID");
       await getPostById(req.params.postId);
       const deleteInfo = await deletePost(req.params.postId);
       res.json(deleteInfo);

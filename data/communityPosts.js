@@ -15,7 +15,7 @@ import {
 import client from "../config/redisClient.js";
 
 const getAllPosts = async (page = 1) => {
-  const limit = 4;
+  const limit = 20;
   if (!Number.isInteger(page)) page = Number(page);
 
   const cacheKey = "community_posts_pages";
@@ -26,44 +26,54 @@ const getAllPosts = async (page = 1) => {
   }
 
   const postsCollection = await communityPosts();
-  const allPostsData = await postsCollection
-    .find()
-    .sort({ $natural: -1 })
-    .toArray();
   const numberOfDocs = await postsCollection.countDocuments();
   if (page < 1) throw badRequestError("Invalid page number in URL!");
 
   let result;
+  let allPosts;
   if (page === 1) {
-    const allPosts = await postsCollection
+    allPosts = await postsCollection
       .find({})
-      .sort({ $natural: -1 })
+      .sort({ postTimestamp: -1 })
       .limit(limit)
       .toArray();
-    result = {
-      allPosts: allPosts,
-      allPostsData: allPostsData,
-      numberOfDocs: numberOfDocs,
-      limit: limit,
-    };
   } else {
-    const allPosts = await postsCollection
+    allPosts = await postsCollection
       .find({})
-      .sort({ $natural: -1 })
+      .sort({ postTimestamp: -1 })
       .skip(limit * (page - 1))
       .limit(limit)
       .toArray();
     if (!allPosts.length) throw notFoundError("There are no more posts!");
-    result = {
-      allPosts: allPosts,
-      allPostsData: allPostsData,
-      numberOfDocs: numberOfDocs,
-      limit: limit,
-    };
   }
+
+  result = {
+    allPosts: allPosts,
+    numberOfDocs: numberOfDocs,
+    limit: limit,
+  };
 
   await client.hSet(cacheKey, field, JSON.stringify(result));
   return result;
+};
+
+const getMyPosts = async (userId, keyword = "") => {
+  const postsCollection = await communityPosts();
+  let myPosts = await postsCollection
+    .find({ userThatPosted: userId })
+    .sort({ postTimestamp: -1 })
+    .toArray();
+
+  if (keyword) {
+    keyword = keyword.toLowerCase();
+    myPosts = myPosts.filter(
+      (post) =>
+        post.postTitle.toLowerCase().includes(keyword) ||
+        post.postDescription.toLowerCase().includes(keyword)
+    );
+  }
+
+  return myPosts;
 };
 
 const getPostById = async (postId) => {
@@ -105,6 +115,7 @@ const createPost = async (
   postDescription = postDescription.trim();
   userThatPosted = userThatPosted.trim();
 
+  const now = moment();
   const newPost = {
     userThatPosted: userThatPosted,
     username: username,
@@ -113,8 +124,9 @@ const createPost = async (
     postImage: postImage,
     postTitle: postTitle,
     postDescription: postDescription,
-    postDate: moment().format("MMM Do YYYY"),
-    postTime: moment().format("h:mm A"),
+    postTimestamp: now.toDate(),
+    postDate: now.format("MMM Do YYYY"),
+    postTime: now.format("h:mm A"),
     postComments: [],
     postLikes: [],
   };
@@ -216,6 +228,7 @@ const searchPosts = async (keyword) => {
 export {
   createPost,
   getAllPosts,
+  getMyPosts,
   getPostById,
   deletePost,
   editPost,

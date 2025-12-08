@@ -10,6 +10,7 @@ import {
   validateString,
   validateUsername,
 } from "../helpers/validations.js";
+import moment from "moment";
 
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
@@ -46,6 +47,7 @@ const registerUser = async (firstName, lastName, username, email, password) => {
     lastName,
     username,
     email,
+    joinedDate: moment().format("MMM Do YYYY"),
     hashedPassword,
     pets: [],
   };

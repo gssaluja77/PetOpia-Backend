@@ -7,7 +7,7 @@ import uploadRoute from "./upload.js";
 
 const constructorMethod = (app) => {
   app.use("/upload", uploadRoute);
-  app.use("/community-posts", communityPostsRoute);
+  app.use("/account", communityPostsRoute);
   app.use("/view-post", commentsRoute);
   app.use("/likes", likesRoute);
   app.use("/account/pets", pets);
