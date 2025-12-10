@@ -3,6 +3,8 @@ const router = Router();
 import xss from "xss";
 import { validateEmail, validatePassword, validateString, validateUsername } from "../helpers/validations.js";
 import { registerUser, loginUser } from "../data/user.js";
+import { deleteSession } from "../helpers/sessionUtil.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 router.route("/signup").post(async (req, res) => {
   let input = req.body;
@@ -46,6 +48,16 @@ router.route("/login").post(async (req, res) => {
     res.status(200).send(data);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+});
+
+router.route("/logout").post(authMiddleware, async (req, res) => {
+  try {
+    const sessionId = req.headers.authorization;
+    await deleteSession(sessionId);
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

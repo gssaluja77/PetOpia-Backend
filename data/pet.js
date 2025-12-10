@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import { users } from "../config/mongoCollections.js";
-import emailSender from "./reminderEmail.js";
 import client from "../config/redisClient.js";
 import { internalServerError, notFoundError } from "../helpers/wrappers.js";
+import emailSender from "../helpers/reminderEmail.js";
 
 const getAllPets = async (userId) => {
   const collection = await users();
