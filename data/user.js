@@ -11,6 +11,7 @@ import {
   validateUsername,
 } from "../helpers/validations.js";
 import moment from "moment";
+import { createSession } from "../helpers/sessionUtil.js";
 
 dotenv.config();
 const saltRounds = parseInt(process.env.SALT_ROUNDS);
@@ -53,12 +54,15 @@ const registerUser = async (firstName, lastName, username, email, password) => {
   };
 
   let insertInfo = await collection.insertOne(newUser);
+
   if (!insertInfo.acknowledged) {
     throw internalServerError("Error : Could not add user!");
   }
-  let id = insertInfo.insertedId.toString();
+
+  const id = insertInfo.insertedId.toString();
+  const sessionId = await createSession(id);
   await client.set(email, id);
-  return { id, email };
+  return { id, sessionId, email };
 };
 
 const loginUser = async (email, password) => {
@@ -75,9 +79,13 @@ const loginUser = async (email, password) => {
     throw badRequestError("Invalid email or password");
   }
 
+  const sessionId = await createSession(user._id.toString());
+
   await client.set(email, user._id.toString());
   return {
     id: user._id.toString(),
+    sessionId,
+    email,
     username: user.username,
     firstName: user.firstName,
     lastName: user.lastName,

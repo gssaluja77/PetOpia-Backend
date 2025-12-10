@@ -17,10 +17,11 @@ import {
   validateString,
   validateUsername,
 } from "../helpers/validations.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 router
   .route("/community-posts")
-  .get(async (req, res) => {
+  .get(authMiddleware, async (req, res) => {
     try {
       const allData = await getAllPosts(req.query.page);
       const searchedData = await searchPosts(req.query.keyword);
@@ -33,7 +34,7 @@ router
       res.status(status).send(error.message);
     }
   })
-  .post(async (req, res) => {
+  .post(authMiddleware, async (req, res) => {
     try {
       let {
         userThatPosted,
@@ -73,7 +74,7 @@ router
     }
   });
 
-router.route("/my-posts").get(async (req, res) => {
+router.route("/my-posts").get(authMiddleware, async (req, res) => {
   try {
     validateObjectId(req.query.userId, "User ID");
 
@@ -90,7 +91,7 @@ router.route("/my-posts").get(async (req, res) => {
 
 router
   .route("/community-posts/:postId")
-  .get(async (req, res) => {
+  .get(authMiddleware, async (req, res) => {
     try {
       validateObjectId(req.params.postId, "Post ID");
       let postById;
@@ -115,7 +116,7 @@ router
       res.status(status).send(error.message);
     }
   })
-  .put(async (req, res) => {
+  .put(authMiddleware, async (req, res) => {
     try {
       validateObjectId(req.params.postId, "Post ID");
       let { userThatPosted, postImage, postTitle, postDescription } = req.body;
@@ -140,7 +141,7 @@ router
       res.status(status).send(error.message);
     }
   })
-  .delete(async (req, res) => {
+  .delete(authMiddleware, async (req, res) => {
     try {
       validateObjectId(req.params.postId, "Post ID");
       await getPostById(req.params.postId);

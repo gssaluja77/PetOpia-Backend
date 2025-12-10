@@ -17,8 +17,9 @@ import {
 import xss from "xss";
 import { badRequestError } from "../helpers/wrappers.js";
 import client from "../config/redisClient.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
-router.route("/mypet/:userId/:petId").get(async (req, res) => {
+router.route("/mypet/:userId/:petId").get(authMiddleware, async (req, res) => {
   try {
     let userId = xss(req.params.userId);
     let petId = xss(req.params.petId);
@@ -35,7 +36,7 @@ router.route("/mypet/:userId/:petId").get(async (req, res) => {
 
 router
   .route("/medication")
-  .post(async (req, res) => {
+  .post(authMiddleware, async (req, res) => {
     try {
       let input = req.body;
       let userId = xss(input.userId);
@@ -68,7 +69,7 @@ router
       res.status(400).send({ error: e });
     }
   })
-  .delete(async (req, res) => {
+  .delete(authMiddleware, async (req, res) => {
     try {
       let input = req.body;
       let userId = xss(input.userId);
@@ -84,7 +85,7 @@ router
 
 router
   .route("/appointment")
-  .post(async (req, res) => {
+  .post(authMiddleware, async (req, res) => {
     try {
       let input = req.body;
       let userId = xss(input.userId);
@@ -117,7 +118,7 @@ router
       res.status(400).send({ error: e });
     }
   })
-  .delete(async (req, res) => {
+  .delete(authMiddleware, async (req, res) => {
     try {
       let input = req.body;
       let userId = xss(input.userId);
@@ -133,7 +134,7 @@ router
 
 router
   .route("/prescription")
-  .post(async (req, res) => {
+  .post(authMiddleware, async (req, res) => {
     try {
       let input = req.body;
       let userId = xss(input.userId);
@@ -153,7 +154,7 @@ router
       res.status(400).send({ error: e });
     }
   })
-  .delete(async (req, res) => {
+  .delete(authMiddleware, async (req, res) => {
     try {
       let input = req.body;
       let userId = xss(input.userId);
@@ -169,7 +170,7 @@ router
 
 router
   .route("/:userid")
-  .get(async (req, res) => {
+  .get(authMiddleware, async (req, res) => {
     try {
       let userId = xss(req.params.userid);
 
@@ -192,7 +193,7 @@ router
       res.status(404).send({ error: e });
     }
   })
-  .post(async (req, res) => {
+  .post(authMiddleware, async (req, res) => {
     try {
       let userId = xss(req.params.userid);
 
@@ -222,7 +223,7 @@ router
       res.status(400).send({ error: e });
     }
   })
-  .put(async (req, res) => {
+  .put(authMiddleware, async (req, res) => {
     try {
       let userId = xss(req.params.userid);
       let input = req.body;
@@ -259,7 +260,7 @@ router
       res.status(400).send({ error: e });
     }
   })
-  .delete(async (req, res) => {
+  .delete(authMiddleware, async (req, res) => {
     try {
       let userId = xss(req.params.userid);
       let input = req.body;

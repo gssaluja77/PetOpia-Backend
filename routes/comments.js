@@ -7,9 +7,11 @@ import {
   postComment,
   unlikeComment,
 } from "../data/comments.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+
 const router = express.Router();
 
-router.route("/:postId").post(async (req, res) => {
+router.route("/:postId").post(authMiddleware, async (req, res) => {
   try {
     const postedComment = await postComment(
       req.params.postId,
@@ -29,7 +31,7 @@ router.route("/:postId").post(async (req, res) => {
 });
 router
   .route("/:postId/:commentId")
-  .delete(async (req, res) => {
+  .delete(authMiddleware, async (req, res) => {
     try {
       const postAfterDeletion = await deleteComment(
         req.params.postId,
@@ -44,7 +46,7 @@ router
       res.status(status).send(error.message);
     }
   })
-  .put(async (req, res) => {
+  .put(authMiddleware, async (req, res) => {
     try {
       const { comment } = req.body;
       const postAfterUpdate = await editComment(
@@ -57,7 +59,7 @@ router
       res.status(error.code).send(error.message);
     }
   })
-  .post(async (req, res) => {
+  .post(authMiddleware, async (req, res) => {
     try {
       const { userThatPosted } = req.body;
       const commentLiked = await likeComment(
@@ -75,7 +77,7 @@ router
     }
   });
 
-router.route("/:postId/:commentId/:userThatPosted").delete(async (req, res) => {
+router.route("/:postId/:commentId/:userThatPosted").delete(authMiddleware, async (req, res) => {
   try {
     const commentUnliked = await unlikeComment(
       req.params.userThatPosted,
