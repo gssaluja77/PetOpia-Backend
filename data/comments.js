@@ -49,26 +49,26 @@ const postComment = async (
   comment = comment.trim();
   userThatPosted = userThatPosted.trim();
 
-  const date = new Date(Date.now());
+  const now = moment();
 
   const newComment = {
     _id: new ObjectId(),
     userThatPosted: userThatPosted,
     username: username,
     userEmail: userEmail,
-    commentDate: moment().format("MMM Do YYYY"),
-    commentTime: moment().format("h:mm A"),
+    commentDate: now.format("MMM Do YYYY"),
+    commentTime: now.format("h:mm A"),
     comment: comment,
     commentLikes: [],
   };
 
   const postsCollection = await communityPosts();
 
-  const postExists = await postsCollection.findOne(
+  const postById = await postsCollection.findOne(
     { _id: new ObjectId(postId) },
     { projection: { _id: 1 } }
   );
-  if (!postExists) throw notFoundError("Post doesn't exist!");
+  if (!postById) throw notFoundError("Post doesn't exist!");
 
   const updatedInfo = await postsCollection.updateOne(
     { _id: new ObjectId(postId) },
@@ -92,8 +92,8 @@ const deleteComment = async (postId, commentId) => {
   validateObjectId(commentId, "Comment ID");
   commentId = commentId.trim();
 
-  const postExists = await getPostById(postId);
-  if (postExists === null) throw notFoundError("Post doesn't exist!");
+  const postById = await getPostById(postId);
+  if (postById === null) throw notFoundError("Post doesn't exist!");
   const postsCollection = await communityPosts();
   const updatedInfo = await postsCollection.updateOne(
     { _id: new ObjectId(postId) },
@@ -101,18 +101,26 @@ const deleteComment = async (postId, commentId) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Comment could not be deleted!");
-  const updatedPost = await getPostById(postId);
 
-  return updatedPost;
+  await client.hDel("posts", postId.toString());
+
+  return {
+    ...postById,
+    postComments: postById.postComments.filter(
+      (comment) => comment._id.toString() !== commentId
+    )
+  };
 };
 
 const editComment = async (postId, commentId, comment) => {
   validateObjectId(commentId, "Comment ID");
-  validateObjectId(commentId, "Post ID");
+  validateObjectId(postId, "Post ID");
   validateString(comment, "Comment");
   commentId = commentId.trim();
   postId = postId.trim();
   comment = comment.trim();
+
+  const oldComment = await getCommentByCommentId(postId, commentId);
 
   const postsCollection = await communityPosts();
   const updatedInfo = await postsCollection.updateOne(
@@ -121,8 +129,13 @@ const editComment = async (postId, commentId, comment) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Comment could not be edited!");
-  const updatedPost = await getPostById(postId);
-  return updatedPost;
+
+  await client.hDel("posts", postId.toString());
+
+  return {
+    ...oldComment,
+    comment: comment
+  };
 };
 
 const likeComment = async (userId, postId, commentId) => {
@@ -142,8 +155,10 @@ const likeComment = async (userId, postId, commentId) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Like not updated!");
+
+  await client.hDel("posts", postId.toString());
+
   const commentLiked = await getCommentByCommentId(postId, commentId);
-  await getPostById(postId);
   return { liked: true, likesLength: commentLiked.commentLikes.length };
 };
 
@@ -164,10 +179,10 @@ const unlikeComment = async (userId, postId, commentId) => {
   );
   if (updatedInfo.modifiedCount === 0)
     throw internalServerError("Unlike not updated!");
-  const commentLiked = await getCommentByCommentId(postId, commentId);
-  commentLiked._id = commentLiked._id.toString();
-  const updatedPost = await getPostById(postId);
 
+  await client.hDel("posts", postId.toString());
+
+  const commentLiked = await getCommentByCommentId(postId, commentId);
   return { liked: true, likesLength: commentLiked.commentLikes.length };
 };
 

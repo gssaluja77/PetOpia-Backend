@@ -5,7 +5,7 @@ import commentsRoute from "./comments.js";
 import likesRoute from "./likes.js";
 import uploadRoute from "./upload.js";
 
-const constructorMethod = (app) => {
+const configRoutes = (app) => {
   app.use("/upload", uploadRoute);
   app.use("/account", communityPostsRoute);
   app.use("/view-post", commentsRoute);
@@ -18,4 +18,4 @@ const constructorMethod = (app) => {
   });
 };
 
-export default constructorMethod;
+export default configRoutes;

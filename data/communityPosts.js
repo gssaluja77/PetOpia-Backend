@@ -116,6 +116,7 @@ const createPost = async (
   userThatPosted = userThatPosted.trim();
 
   const now = moment();
+
   const newPost = {
     userThatPosted: userThatPosted,
     username: username,
@@ -140,7 +141,7 @@ const createPost = async (
 
   await client.del("community_posts_pages");
 
-  return newPost;
+  return { _id: insertedInfo.insertedId.toString(), ...newPost };
 };
 
 const editPost = async (
@@ -185,9 +186,10 @@ const editPost = async (
   if (updateInfo.modifiedCount === 0)
     throw internalServerError("You haven't made any changes!");
 
+  await client.hDel("posts", postId.toString());
   await client.del("community_posts_pages");
 
-  return await getPostById(postId);
+  return { _id: postId, ...updatedPost };
 };
 
 const deletePost = async (postId) => {

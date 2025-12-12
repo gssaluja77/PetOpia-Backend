@@ -95,11 +95,8 @@ const validateUsername = (username) => {
   if (!username || typeof username != "string")
     throw badRequestError(`Missing username!`);
   username = username.trim().toLowerCase();
-  const usernameRegex = /^[a-z0-9]{2,}$/i;
-  if (!usernameRegex.test(username))
-    throw badRequestError(
-      `Invalid username: The username must be alphanumeric and have atleast 2 characters!`
-    );
+  if (!username || username.length < 2)
+    throw badRequestError(`Invalid username: The username must be have atleast 2 characters!`);
 };
 
 const validatePassword = (password) => {
