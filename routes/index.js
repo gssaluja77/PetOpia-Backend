@@ -7,10 +7,10 @@ import uploadRoute from "./upload.js";
 
 const configRoutes = (app) => {
   app.use("/upload", uploadRoute);
+  app.use("/account/pets", pets);
   app.use("/account", communityPostsRoute);
   app.use("/view-post", commentsRoute);
   app.use("/likes", likesRoute);
-  app.use("/account/pets", pets);
   app.use("/user", user);
 
   app.use("*", (_req, res) => {
