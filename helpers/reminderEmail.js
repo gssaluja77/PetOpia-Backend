@@ -2,11 +2,11 @@ import nodemailer from "nodemailer";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const emailSender = async (toAddress, forWhat, forWhom, content) => {
+const emailSender = async (toAddress, from, subject, content) => {
   const mailOptions = {
-    from: `"PetOpia" <${process.env.EMAIL}>`,
+    from: `${from} <${process.env.EMAIL}>`,
     to: toAddress,
-    subject: `${forWhat} reminder for ${forWhom} from PetOpia!`,
+    subject: subject,
     html: content,
   };
 

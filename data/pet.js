@@ -278,13 +278,15 @@ const appointmentReminder = async () => {
 
         if (appointment.appointmentDate === convertedDate) {
           const userEmail = user.email.toString();
-          const petName = pet.petName.toString();
-          const html = `<p>Dear ${user.firstName},</p>
-                        <p>This is a friendly reminder that you have an appointment for your pet, ${pet.petName}, scheduled for tomorrow (${appointment.appointmentDate}) at ${appointment.clinicName} regarding ${appointment.reason}.</p>
-                        <br />
-                        <p>Best regards,<br/>The PetOpia Team</p>`;
+          const from = "PetOpia";
+          const subject = `Appointment Reminder from ${from} 🐾`;
 
-          await emailSender(userEmail, "Appointment", petName, html);
+          const html = `<p>Dear ${user.firstName},</p>
+                        <p>This is a friendly reminder that you have an upcoming appointment for your pet, <strong>${pet.petName}</strong>, scheduled for <strong>tomorrow (${appointment.appointmentDate})</strong> at <strong>${appointment.clinicName}</strong> regarding ${appointment.reason}.</p>
+                        <br />
+                        <p>Best Regards,<br/><strong>The ${from} Team</strong></p>`;
+
+          await emailSender(userEmail, from, subject, html);
         }
       }
     }
