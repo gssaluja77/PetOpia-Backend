@@ -36,7 +36,6 @@
     "moment-timezone": "^0.5.43",
     "mongodb": "^5.1.0",
     "multer": "^2.0.2",
-    "node-cron": "^3.0.2",
     "nodemailer": "^6.9.1",
     "path": "^0.12.7",
     "xss": "^1.0.14"
