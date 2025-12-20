@@ -1,7 +1,8 @@
 import { MongoClient } from "mongodb";
-import * as dotenv from "dotenv";
+import { configDotenv } from "dotenv";
 
-dotenv.config();
+configDotenv();
+
 let _connection = undefined;
 let _db = undefined;
 
