@@ -92,4 +92,10 @@ const loginUser = async (email, password) => {
   };
 };
 
-export { registerUser, loginUser };
+// This is just for resetting inactivity timer
+const invokeDB = async () => {
+  const collection = await users();
+  const users = await collection.find({}).toArray();
+}
+
+export { registerUser, loginUser, invokeDB };
