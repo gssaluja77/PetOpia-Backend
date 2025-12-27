@@ -21,7 +21,6 @@ router.route("/invoke-db").get(async (req, res) => {
             return res.status(401).json({ error: "Unauthorized" });
         }
         await invokeDB();
-
         res.status(200).json({ message: "DB invoked successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -95,7 +95,7 @@ const loginUser = async (email, password) => {
 // This is just for resetting inactivity timer
 const invokeDB = async () => {
   const collection = await users();
-  const users = await collection.find({}).toArray();
+  await collection.find({}).toArray();
 }
 
 export { registerUser, loginUser, invokeDB };

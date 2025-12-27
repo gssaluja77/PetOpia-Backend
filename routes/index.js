@@ -5,8 +5,10 @@ import commentsRoute from "./comments.js";
 import likesRoute from "./likes.js";
 import uploadRoute from "./upload.js";
 import cronRoute from "./cron.js";
+import defaultPage from "./defaultPage.js";
 
 const configRoutes = (app) => {
+  app.use("/", defaultPage);
   app.use("/upload", uploadRoute);
   app.use("/account/pets", petsRoute);
   app.use("/account", communityPostsRoute);
