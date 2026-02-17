@@ -24,8 +24,8 @@ if (process.env.NODE_ENV === "development") {
     });
   });
 } else {
-  const url = process.env.KV_REST_API_URL;
-  const token = process.env.KV_REST_API_TOKEN;
+  const url = process.env.KV_NEW_KV_REST_API_URL;
+  const token = process.env.KV_NEW_KV_REST_API_TOKEN;
 
   if (url && token) {
     try {
