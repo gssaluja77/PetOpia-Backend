@@ -92,10 +92,13 @@ const loginUser = async (email, password) => {
   };
 };
 
-// This is just for resetting inactivity timer
+// This is just for resetting inactivity timer for both MongoDB and Redis
 const invokeDB = async () => {
   const collection = await users();
-  await collection.find({}).toArray();
-}
+  await collection.countDocuments();
+
+  // Ping Redis to prevent inactivity warnings from Upstash
+  await client.exists("inactivity-interuptor");
+};
 
 export { registerUser, loginUser, invokeDB };
